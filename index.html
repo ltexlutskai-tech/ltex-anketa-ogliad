@@ -367,12 +367,28 @@ const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxHK1rmcBP4WIfE
 /* Зіставлення колонок бази з полями форми (за назвами заголовків у вашій таблиці).
    Зліва — назва поля у формі, справа — можливі назви колонок у базі. */
 const FIELD_MAP = {
+  // верхня панель «підтягнуто автоматично»
   "Номенклатура":   ["Номенклатура","Назва","Наименование"],
-  "Категорії_база": ["Категорії","Категории","Категорія"],
+  "Категорії_база": ["Категорії","Категории"],
   "Середня вага":   ["Средний вес","Середня вага","Вес","Вага"],
   "Ціна продажу":   ["Цена продажи","Ціна продажу","Цена","Ціна"],
   "YouTube":        ["Ссылка на youtube","YouTube","Ютуб","Видео","Відео"],
-  "Опис_база":      ["Опис","Описание","Description"]
+  "Опис_база":      ["Опис","Описание","Description"],
+  // прямі мапінги колонок «Бази» на конкретні поля анкети (розкладаються з ✓Опис в Apps Script)
+  "Категорія":           ["Категорія"],
+  "Бренд/збірка":        ["Бренд/збірка","Бренд","Збірка"],
+  "Країна":              ["Країна","Страна"],
+  "Сорт":                ["Сорт"],
+  "Пропорція сортів":    ["Пропорція сортів","Пропорция сортов"],
+  "Сезон":               ["Сезон"],
+  "Вага лота":           ["Вага лота","Вес лота"],
+  "Вага одиниці":        ["Вага одиниці","Вес единицы"],
+  "Кількість одиниць":   ["Кількість одиниць","Количество единиц"],
+  "Собівартість одиниці":["Собівартість одиниці","Себестоимость единицы"],
+  "Стать/вік":           ["Стать/вік","Стать","Пол"],
+  "Пропорція статі":     ["Пропорція статі"],
+  "Наповнення":          ["Наповнення","Наполнение"],
+  "Розмірна сітка":      ["Розмірна сітка","Розміри","Размеры"]
 };
 /* ========================================================= */
 
@@ -407,17 +423,63 @@ function lookup(){
 function setStatus(msg,cls){ const e=$("#lookupStatus"); e.textContent=msg; e.className="lookup-status "+(cls||""); }
 
 function pick(row, names){ for(const n of names){ for(const k in row){ if(k.trim().toLowerCase()===n.toLowerCase() && row[k]!=="" && row[k]!=null) return row[k]; } } return ""; }
+
+/* Поставити значення в поле з ім'ям name. Працює для input/textarea,
+   select (точний матч option.value) і чекбокс-груп (Сорт). */
+function setField(name, value){
+  if(value === "" || value == null) return false;
+  const els = document.querySelectorAll('[name="'+name+'"]');
+  if(!els.length) return false;
+  const sval = String(value).trim();
+  if(!sval) return false;
+
+  // Чекбокс-група (декілька <input type=checkbox> з тим самим name, напр. Сорт)
+  if(els.length > 1 && els[0].type === "checkbox"){
+    const parts = sval.split(/[,;+/]| та | і /i).map(s => s.trim().toLowerCase()).filter(Boolean);
+    let any = false;
+    els.forEach(cb => {
+      if(parts.includes(cb.value.toLowerCase())){
+        cb.checked = true;
+        const chip = cb.closest(".chip"); if(chip) chip.classList.add("auto-filled");
+        any = true;
+      }
+    });
+    return any;
+  }
+
+  const el = els[0];
+
+  // Select: знайти option зі значенням, що збігається (case-insensitive)
+  if(el.tagName === "SELECT"){
+    const target = sval.toLowerCase();
+    for(const opt of el.options){
+      if(opt.value && opt.value.toLowerCase() === target){
+        el.value = opt.value;
+        el.classList.add("auto-filled");
+        return true;
+      }
+    }
+    return false; // тиша краще за випадкове перетирання
+  }
+
+  // input / textarea
+  el.value = sval;
+  el.classList.add("auto-filled");
+  return true;
+}
+
 function fillAuto(row){
   for(const field in FIELD_MAP){
-    const el = document.querySelector('[name="'+field+'"]');
-    if(!el) continue;
     const val = pick(row, FIELD_MAP[field]);
-    if(val!==""){ el.value = val; el.classList.add("auto-filled"); }
+    setField(field, val);
   }
-  // спроба визначити категорію з тексту "Категорії"
-  const catText = (pick(row, FIELD_MAP["Категорії_база"])||"").toString().toLowerCase();
-  const map = [["взутт","Взуття"],["bric","Bric-a-Brac"],["іграш","Іграшки"],["зоо","Зоотовари"],["технік","Побутова техніка"],["косметик","Косметика"],["аксесуар","Аксесуари"],["дім","Дім та побут"],["побут","Дім та побут"],["одяг","Одяг"],["світшот","Одяг"],["худі","Одяг"],["куртк","Одяг"],["штани","Одяг"],["шорт","Одяг"],["футболк","Одяг"]];
-  for(const [needle,cat] of map){ if(catText.includes(needle)){ $("#catSelect").value=cat; onCat(); break; } }
+  // Категорія: якщо колонка "Категорія" не дала точного матчу — спробуємо за ключовими словами в Категоріях
+  if(!$("#catSelect").value){
+    const catText = (pick(row, FIELD_MAP["Категорії_база"])||"").toString().toLowerCase();
+    const map = [["взутт","Взуття"],["bric","Bric-a-Brac"],["іграш","Іграшки"],["зоо","Зоотовари"],["технік","Побутова техніка"],["косметик","Косметика"],["аксесуар","Аксесуари"],["дім","Дім та побут"],["побут","Дім та побут"],["одяг","Одяг"],["світшот","Одяг"],["худі","Одяг"],["куртк","Одяг"],["штани","Одяг"],["шорт","Одяг"],["футболк","Одяг"]];
+    for(const [needle,cat] of map){ if(catText.includes(needle)){ $("#catSelect").value=cat; break; } }
+  }
+  if($("#catSelect").value){ $("#catSelect").classList.add("auto-filled"); onCat(); }
   buildPreview();
 }
 $("#findBtn").addEventListener("click", lookup);
