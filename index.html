@@ -144,6 +144,13 @@
   .addx{align-self:flex-start;cursor:pointer;border:1.5px dashed #bcd8c7;background:var(--green-l);color:var(--green-d);font-weight:700;font-size:13.5px;padding:9px 16px;border-radius:10px;font-family:inherit}
   .addx:hover{border-color:var(--accent);background:#dcefe6}
   .xhint{font-size:11.5px;color:var(--mut);margin-top:-2px}
+
+  /* НАПОВНЕННЯ — список позицій */
+  .filllist{display:flex;flex-direction:column;gap:8px}
+  .frow{display:grid;grid-template-columns:minmax(0,1fr) 92px 38px;gap:8px;align-items:center}
+  .frow input{font-size:14px;padding:9px 11px}
+  .frow .fname{font-weight:600}
+  @media(max-width:560px){.frow,.xrow{grid-template-columns:minmax(0,1fr) 72px 38px}}
 </style>
 </head>
 <body>
@@ -154,6 +161,10 @@
     <div class="hint">Заповнюйте під час огляду лоту. Чим точніше — тим краще опис і пошук для клієнта.</div>
   </div>
 </header>
+
+<!-- Підказки полів, які запам'ятовуються між товарами -->
+<datalist id="xname-suggestions"></datalist>
+<datalist id="fill-suggestions"></datalist>
 
 <div class="wrap">
 
@@ -223,7 +234,10 @@
           <label class="chip"><input type="checkbox" name="Сорт" value="Мікс"><span>Мікс</span></label>
         </div>
       </div>
-      <div class="field"><label>Пропорція сортів <small>якщо мікс</small></label><input type="text" name="Пропорція сортів" placeholder="напр. 70% 1-й + 30% Екстра"></div>
+      <div class="field full">
+        <label>Пропорція сортів <small>якщо мікс — введіть кількість одиниць кожного сорту, % порахується сам</small></label>
+        <div id="host-sorts"></div>
+      </div>
       <div class="field"><label>Сезон</label>
         <select name="Сезон"><option value="">—</option><option>Літо</option><option>Демісезон</option><option>Зима</option><option>Всесезон</option></select>
       </div>
@@ -248,14 +262,17 @@
     <div class="sec-h"><span class="sec-n">3</span><span class="sec-t">Наповнення лоту</span></div>
     <p class="sec-d">Що саме людина отримає, відкривши мішок. Дивіться весь лот і відповідайте якомога конкретніше.</p>
     <div class="grid">
-      <div class="field"><label>Стать / вік</label>
-        <select name="Стать/вік"><option value="">—</option><option>Чоловіче</option><option>Жіноче</option><option>Дитяче</option><option>Унісекс</option><option>Мікс</option></select>
+      <div class="field full">
+        <label>Стать / вік <small>введіть кількість одиниць кожної статі — пропорція порахується сама</small></label>
+        <div id="host-gender"></div>
       </div>
-      <div class="field"><label>Пропорція статі/віку <small>якщо мікс</small></label><input type="text" name="Пропорція статі" placeholder="напр. жінки 70% / чоловіки 30%"></div>
-      <div class="field full"><label>Детальне наповнення <span class="req">*</span> <small>перелік усього, що входить у лот</small></label>
-        <textarea name="Наповнення" placeholder="напр.: посуд, тарілки, чашки, серветки, декор, дитячий посуд, маски, картини..."></textarea></div>
-      <div class="field"><label>Які позиції переважають <small>чого найбільше</small></label><input type="text" name="Переважають" placeholder="напр.: найбільше футболок і шорт"></div>
-      <div class="field"><label>Бренди, помічені всередині <small>через кому</small></label><input type="text" name="Бренди всередині" placeholder="напр.: GILDAN, adidas, H&M, PUMA"></div>
+      <div class="field full">
+        <label>Детальне наповнення <span class="req">*</span> <small>додавайте позиції зі списку для категорії або вписуйте свої; кількість — за бажанням, для авто-визначення «переважають»</small></label>
+        <div id="host-fill"></div>
+      </div>
+      <div class="field full"><label>Які позиції переважають <small>визначається автоматично з наповнення; можна виправити вручну</small></label>
+        <input type="text" name="Переважають" placeholder="порахується з наповнення…"></div>
+      <div class="field full"><label>Бренди, помічені всередині <small>через кому</small></label><input type="text" name="Бренди всередині" placeholder="напр.: GILDAN, adidas, H&M, PUMA"></div>
       <div class="field full"><label>Особливі / цінні позиції <small>якщо трапилось щось вартісне чи незвичне</small></label>
         <input type="text" name="Особливі позиції" placeholder="напр.: фірмова куртка, нова техніка, колекційна порцеляна"></div>
       <div class="field full"><label>Коментар до наповнення <small>нестандартні випадки, що рідко трапляється</small></label>
@@ -342,14 +359,24 @@
     <div class="grid">
       <div class="field"><label>Загальний стан</label>
         <select name="Загальний стан"><option value="">—</option><option>Відмінний</option><option>Дуже хороший</option><option>Хороший</option><option>Задовільний</option><option>Мікс станів</option></select></div>
-      <div class="field"><label>Скільки з бирками <small>нове</small></label>
-        <select name="З бирками"><option value="">—</option><option>Немає</option><option>До 20%</option><option>20-40%</option><option>40-60%</option><option>Понад 60%</option><option>Майже все</option></select></div>
-      <div class="field"><label>Скільки нового без бирок</label>
-        <select name="Нове без бирок"><option value="">—</option><option>Немає</option><option>Невелика частина</option><option>Близько половини</option><option>Більшість</option></select></div>
       <div class="field"><label>Чистота</label>
         <select name="Чистота"><option value="">—</option><option>Чисте / пране</option><option>Потребує прання</option><option>Мікс</option></select></div>
-      <div class="field full"><label>Пакування</label>
+      <div class="field"><label>Запах</label>
+        <select name="Запах"><option value="">—</option><option>Нейтральний / свіже</option><option>Легкий складський</option><option>Потребує провітрювання</option></select></div>
+      <div class="field"><label>Прасування</label>
+        <select name="Прасування"><option value="">—</option><option>Не потребує</option><option>Бажане відпарювання</option><option>Потребує прасування</option></select></div>
+      <div class="field"><label>Стійкість кольору</label>
+        <select name="Стійкість кольору"><option value="">—</option><option>Колір насичений</option><option>Поодиноке злиняле</option><option>Є злиняле</option></select></div>
+      <div class="field"><label>Катишки / пілінг</label>
+        <select name="Катишки"><option value="">—</option><option>Немає</option><option>Поодинокі</option><option>Помітні</option></select></div>
+      <div class="field"><label>Фурнітура <small>ґудзики, блискавки</small></label>
+        <select name="Фурнітура"><option value="">—</option><option>Ціла / робоча</option><option>Поодинокі дефекти</option><option>Часті дефекти</option></select></div>
+      <div class="field"><label>Пакування</label>
         <input type="text" name="Пакування" placeholder="напр.: фабрична упаковка / целофан / семафорна / розсип"></div>
+    </div>
+    <div class="subh">Новизна — розподіл одиниць <small>— кількість, % сам</small></div>
+    <div id="host-tags"></div>
+    <div class="grid one" style="margin-top:14px">
       <div class="field full"><label>Коментар до стану</label>
         <textarea name="Коментар: Стан" placeholder="нестандартні випадки стану/чистоти"></textarea></div>
     </div>
@@ -387,9 +414,6 @@
 
       <div class="subh">Матеріал верху</div>
       <div id="host-shoe-material"></div>
-
-      <div class="subh">Стать / призначення</div>
-      <div id="host-shoe-gender"></div>
 
       <div class="subh">Дефекти <small>— % від усіх пар</small></div>
       <div id="host-shoe-defects"></div>
@@ -526,6 +550,10 @@ const FIELD_MAP = {
    base:"sum"  — відсоток від суми введених у групі (взаємовиключні осі, сума=100%)
    base:"total"— відсоток від загальної кількості одиниць (незалежні ознаки)         */
 const COUNTER_GROUPS = {
+  // класифікація / наповнення / стан
+  "host-sorts":           {group:"Сорти",            base:"sum",   fmt:"label_pct",   rows:["Екстра","Крем","1-й сорт","2-й сорт","Сток"]},
+  "host-gender":          {group:"Стать",            base:"sum",   fmt:"label_pct",   rows:["Чоловіче","Жіноче","Дитяче","Унісекс"]},
+  "host-tags":            {group:"Новизна",          base:"sum",   fmt:"pct_label",   rows:["з бирками (нове)","нове без бирок","вживане — відмінне","вживане — сліди носки"]},
   "host-sizes":           {group:"Розміри",          base:"sum",   fmt:"label_colon", rows:["S та менші (XS-S)","M","L","XL-2XL","3XL та більші"]},
   "host-colors":          {group:"Кольори",          base:"sum",   fmt:"pct_label",   rows:["темні тона","кольорові тона"]},
   // футболки
@@ -542,8 +570,21 @@ const COUNTER_GROUPS = {
   "host-shoe-type":       {group:"Тип взуття",       base:"sum",   fmt:"label_pct",   rows:["кросівки / кеди","туфлі","черевики / ботильйони","чоботи","босоніжки / сандалі","шльопанці / в'єтнамки","балетки / мокасини","гумові чоботи","домашні капці","спортивне (бутси, треки)"]},
   "host-shoe-size":       {group:"Розміри взуття",   base:"sum",   fmt:"label_colon", rows:["≤36","37-38","39-40","41-42","43-44","45+"]},
   "host-shoe-material":   {group:"Матеріал верху",   base:"sum",   fmt:"label_pct",   rows:["натуральна шкіра","замша / нубук","екошкіра / шкірзам","текстиль","гума / EVA"]},
-  "host-shoe-gender":     {group:"Стать взуття",     base:"sum",   fmt:"label_pct",   rows:["чоловіче","жіноче","дитяче","унісекс"]},
   "host-shoe-defects":    {group:"Дефекти взуття",   base:"total", fmt:"pct_label",   rows:["стерта підошва","потертості верху","відклеєна підошва","відсутні шнурки / устілки","плями / забруднення","деформація / залом"]}
+};
+
+/* Підказки позицій наповнення за категорією */
+const FILL_SUGGESTIONS = {
+  "Одяг":["футболки","кофти","світшоти","худі","сорочки","блузки","штани","джинси","шорти","спідниці","сукні","куртки","пальта","светри","кардигани","жилети","спортивні костюми","білизна","шкарпетки","піжами","купальники","дитячий одяг"],
+  "Взуття":["кросівки","кеди","туфлі","черевики","чоботи","босоніжки","сандалі","шльопанці","балетки","мокасини","капці","гумові чоботи"],
+  "Аксесуари":["сумки","рюкзаки","гаманці","ремені","шапки","шарфи","рукавички","краватки","окуляри","парасолі","біжутерія","годинники"],
+  "Дім та побут":["посуд","тарілки","чашки","склянки","столові прибори","текстиль","рушники","постільна білизна","штори","ковдри","подушки","декор","вази","свічники","кухонне приладдя"],
+  "Bric-a-Brac":["посуд","декор","іграшки","книги","рамки","сувеніри","текстиль","дрібна техніка","біжутерія","картини"],
+  "Побутова техніка":["фени","праски","чайники","тостери","блендери","мікрохвильовки","обігрівачі","пилососи","кавоварки","міксери"],
+  "Іграшки":["мʼякі іграшки","конструктори","ляльки","машинки","настільні ігри","розвивальні іграшки","фігурки","пазли"],
+  "Зоотовари":["іграшки","миски","повідки","шлейки","нагрудники","переноски","лежаки","одяг для тварин","поїлки"],
+  "Косметика":["креми","шампуні","гелі для душу","парфуми","декоративна косметика","засоби для волосся","догляд за тілом","маски"],
+  "Інше":[]
 };
 const SIZE_GROUP = "Розміри"; // сума цієї групи = «Усього одиниць» за замовч.
 /* ========================================================= */
@@ -748,18 +789,28 @@ document.addEventListener("input", e=>{
   const t=e.target;
   if(t.classList.contains("cpct")){ t.dataset.dirty="1"; t.classList.add("dirty"); }
   if(t.id==="totalUnits" || t.id==="totalPairs"){ t.dataset.dirty = t.value.trim()?"1":""; }
+  if(t.name==="Переважають"){ t.dataset.dirty = t.value.trim()?"1":""; }
   if(t.classList.contains("ccount") || t.classList.contains("cpct") ||
      t.id==="totalUnits" || t.id==="totalPairs" ||
-     t.classList.contains("xname") || t.classList.contains("xval")){
+     t.classList.contains("xname") || t.classList.contains("xval") ||
+     t.classList.contains("fname") || t.classList.contains("fcount")){
     buildPreview(); saveDraft();
   }
 });
-/* Кнопки «+ Додати поле» та видалення кастомного рядка */
+/* Запамʼятовування підказок (назв характеристик і позицій наповнення) */
+document.addEventListener("change", e=>{
+  const t=e.target;
+  if(t.classList.contains("xname") && t.value.trim()){ rememberInto(SUG_FIELDS, t.value); refreshFieldSuggestions(); }
+  if(t.classList.contains("fname") && t.value.trim()){ rememberInto(SUG_FILL, t.value); updateFillSuggestions($("#catSelect").value); }
+});
+/* Кнопки «+ Додати поле» / «+ Додати позицію» та видалення рядків */
 document.addEventListener("click", e=>{
+  const addF=e.target.closest(".addfill");
+  if(addF){ addFillRow("", "", true); return; }
   const add=e.target.closest(".addx");
   if(add){ addXRow(add.closest("section.card").querySelector(".extras"), "", "", true); return; }
   const del=e.target.closest(".xdel");
-  if(del){ del.closest(".xrow").remove(); buildPreview(); saveDraft(); }
+  if(del){ del.closest(".xrow, .frow").remove(); buildPreview(); saveDraft(); }
 });
 
 /* ====================== КАСТОМНІ ПОЛЯ ====================== */
@@ -778,7 +829,7 @@ function initExtras(){
 function addXRow(box, name, val, focus){
   if(!box) return;
   const row=document.createElement("div"); row.className="xrow";
-  row.innerHTML='<input class="xname" type="text" placeholder="Назва характеристики">'+
+  row.innerHTML='<input class="xname" type="text" list="xname-suggestions" placeholder="Назва характеристики">'+
                 '<input class="xval" type="text" placeholder="Значення">'+
                 '<button class="xdel" type="button" title="Видалити">✕</button>';
   const btn=box.querySelector(".addx");
@@ -823,6 +874,76 @@ function restoreExtras(o){
   });
 }
 
+/* ====================== ПАМʼЯТЬ ПІДКАЗОК (між товарами) ====================== */
+const SUG_FIELDS="ltex_field_suggestions";   // назви кастомних характеристик
+const SUG_FILL="ltex_fill_suggestions";      // власні позиції наповнення
+function loadArr(k){ try{ return JSON.parse(localStorage.getItem(k))||[]; }catch(e){ return []; } }
+function rememberInto(k, val){
+  if(!val) return; const v=String(val).trim(); if(!v) return;
+  const a=loadArr(k);
+  if(!a.some(x=>x.toLowerCase()===v.toLowerCase())){ a.push(v); try{ localStorage.setItem(k, JSON.stringify(a)); }catch(e){} }
+}
+function fillDatalist(id, arr){
+  const dl=document.getElementById(id); if(!dl) return;
+  dl.innerHTML = arr.map(v=>'<option value="'+String(v).replace(/"/g,"&quot;")+'">').join("");
+}
+function refreshFieldSuggestions(){ fillDatalist("xname-suggestions", loadArr(SUG_FIELDS)); }
+function updateFillSuggestions(cat){
+  const base=(FILL_SUGGESTIONS[cat]||[]).slice();
+  loadArr(SUG_FILL).forEach(v=>{ if(!base.some(x=>x.toLowerCase()===v.toLowerCase())) base.push(v); });
+  fillDatalist("fill-suggestions", base);
+}
+
+/* ====================== СПИСОК НАПОВНЕННЯ ====================== */
+function initFill(){
+  const host=$("#host-fill"); if(!host || host.dataset.init) return;
+  host.dataset.init="1";
+  host.innerHTML='<div class="filllist"></div>'+
+                 '<button type="button" class="addfill addx" style="margin-top:8px">+ Додати позицію</button>';
+}
+function addFillRow(name, count, focus){
+  const host=$("#host-fill"); if(!host) return;
+  const list=host.querySelector(".filllist");
+  const row=document.createElement("div"); row.className="frow";
+  row.innerHTML='<input class="fname" type="text" list="fill-suggestions" placeholder="позиція (напр. футболки)">'+
+                '<input class="fcount" type="number" min="0" inputmode="numeric" placeholder="к-сть">'+
+                '<button class="xdel" type="button" title="Видалити">✕</button>';
+  list.appendChild(row);
+  if(name) row.querySelector(".fname").value=name;
+  if(count!=="" && count!=null) row.querySelector(".fcount").value=count;
+  if(focus) row.querySelector(".fname").focus();
+  return row;
+}
+function fillItems(){
+  const out=[];
+  $$("#host-fill .frow").forEach(r=>{
+    const n=r.querySelector(".fname").value.trim();
+    const c=r.querySelector(".fcount").value.trim();
+    if(n) out.push({name:n, count:c!==""?parseFloat(c):null});
+  });
+  return out;
+}
+function fillSummary(){ return fillItems().map(i=>i.name).join(", "); }
+function fillState(){ return fillItems().map(i=>[i.name, i.count==null?"":String(i.count)]); }
+function restoreFill(arr){ if(!arr || !arr.length) return; arr.forEach(([n,c])=>addFillRow(n,c,false)); }
+/* «Переважають» автоматично з наповнення */
+function computePrevail(){
+  const items=fillItems(); if(!items.length) return "";
+  const withC=items.filter(i=>i.count!=null && i.count>0);
+  if(withC.length){
+    const max=Math.max.apply(null, withC.map(i=>i.count));
+    return withC.filter(i=>i.count===max).map(i=>i.name).join(", ");
+  }
+  return items.slice(0,2).map(i=>i.name).join(", ");
+}
+function applyPrevail(){
+  const el=document.querySelector('[name="Переважають"]'); if(!el) return;
+  if(el.dataset.dirty) return;
+  const p=computePrevail();
+  el.value=p;
+  if(p) el.classList.add("auto-filled"); else el.classList.remove("auto-filled");
+}
+
 /* ---------- КАТЕГОРІЙНІ БЛОКИ ---------- */
 function onType(){
   const t = $("#prodType") ? $("#prodType").value : "";
@@ -847,6 +968,7 @@ function onCat(){
   // клотинг-онлі блоки (розміри/фасони/дефекти) — лише для Одягу
   const isClothing = (cat==="Одяг");
   $$(".clothing-only").forEach(s=>s.style.display = isClothing ? "block" : "none");
+  updateFillSuggestions(cat);
   renumber();
 }
 $("#catSelect").addEventListener("change", ()=>{ onCat(); buildPreview(); });
@@ -875,6 +997,12 @@ function collect(){
   });
   // структуровані рядки з лічильників → окремі колонки в таблиці
   const put=(k,v)=>{ if(v) data[k]=v; };
+  applyPrevail();
+  put("Пропорція сортів", groupSummary("Сорти"));
+  put("Стать", groupSummary("Стать"));
+  put("Наповнення", fillSummary());
+  put("Переважають", (document.querySelector('[name="Переважають"]')||{}).value || "");
+  put("Новизна", groupSummary("Новизна"));
   if(data["Категорія"]==="Одяг"){
     put("Кольори", groupSummary("Кольори"));
     put("Фасони", fasonString(data));
@@ -887,7 +1015,6 @@ function collect(){
     put("Тип взуття", groupSummary("Тип взуття"));
     put("Розміри взуття", groupSummary("Розміри взуття"));
     put("Матеріал верху", groupSummary("Матеріал верху"));
-    put("Стать взуття", groupSummary("Стать взуття"));
     let def = groupSummary("Дефекти взуття");
     if(data["Коментар: Взуття"]) def = [def, data["Коментар: Взуття"]].filter(Boolean).join("; ");
     put("Дефекти", def);
@@ -916,14 +1043,15 @@ function fasonString(d){
 }
 function buildPreview(){
   recalcCounters();
+  applyPrevail();
   const d = collect();
   const cat = d["Категорія"];
   const ex = extrasByPv();
   const L=[];
   const add=(k,v)=>{ if(v) L.push("✔️ "+k+": "+v); };
   add("Сезон", d["Сезон"]||d["Сезонність взуття"]);
-  add("Сорт", d["Сорт"]);
-  add("Стать", d["Стать/вік"]||groupSummary("Стать взуття"));
+  add("Сорт", groupSummary("Сорти")||d["Сорт"]);
+  add("Стать", groupSummary("Стать"));
   add("Бренд", d["Бренд/збірка"]);
   add("Країна", d["Країна"]);
   add("Розміри", d["Розмірний діапазон"]||d["Розмірний діапазон взуття"]);
@@ -967,9 +1095,13 @@ function buildPreview(){
   const st=[];
   const adds=(k,v)=>{ if(v) st.push(k+": "+v); };
   adds("загальний стан", d["Загальний стан"]);
-  adds("з бирками", d["З бирками"]);
-  adds("нове без бирок", d["Нове без бирок"]);
+  adds("новизна", groupSummary("Новизна"));
   adds("чистота", d["Чистота"]);
+  adds("запах", d["Запах"]);
+  adds("прасування", d["Прасування"]);
+  adds("стійкість кольору", d["Стійкість кольору"]);
+  adds("катишки", d["Катишки"]);
+  adds("фурнітура", d["Фурнітура"]);
   let defects = (cat==="Взуття") ? groupSummary("Дефекти взуття") : groupSummary("Дефекти");
   const defComment = (cat==="Взуття") ? d["Коментар: Взуття"] : d["Коментар: Дефекти"];
   if(cat!=="Взуття" && defComment) defects = [defects, defComment].filter(Boolean).join("; ");
@@ -1019,8 +1151,10 @@ function saveDraft(){
     const d=collect();
     const tu=$("#totalUnits"); if(tu && !tu.dataset.dirty) delete d["Усього одиниць"]; // авто — не зберігаємо
     const tp=$("#totalPairs"); if(tp && !tp.dataset.dirty) delete d["Усього пар"];
+    const pe=document.querySelector('[name="Переважають"]'); if(pe && !pe.dataset.dirty) delete d["Переважають"]; // авто
     d.__counters=counterState();
     d.__extras=extrasState();
+    d.__fill=fillState();
     localStorage.setItem(DRAFT, JSON.stringify(d));
     $("#saveState").textContent="Чернетку збережено · "+new Date().toLocaleTimeString("uk");
   }catch(e){}
@@ -1030,8 +1164,10 @@ function loadDraft(){
     const raw=localStorage.getItem(DRAFT); if(!raw) return;
     const d=JSON.parse(raw);
     restoreExtras(d.__extras); // спершу відновити кастомні поля, щоб їх не перетерло
+    restoreFill(d.__fill);
+    if(d["Переважають"]){ const pe=document.querySelector('[name="Переважають"]'); if(pe) pe.dataset.dirty="1"; }
     for(const k in d){
-      if(k==="__counters"||k==="__extras") continue;
+      if(k==="__counters"||k==="__extras"||k==="__fill") continue;
       const els=$$('[name="'+CSS.escape(k)+'"]');
       if(k==="Сорт"){ d[k].split(", ").forEach(v=>{const c=document.querySelector('input[name="Сорт"][value="'+v+'"]'); if(c)c.checked=true;}); continue; }
       if(els.length===1 && els[0].type!=="radio") els[0].value=d[k];
@@ -1073,7 +1209,11 @@ $("#submitBtn").addEventListener("click", async ()=>{
 
 renderCounters();
 initExtras();
+initFill();
+refreshFieldSuggestions();
+updateFillSuggestions("");
 loadDraft();
+if(!$$("#host-fill .frow").length) addFillRow("","",false); // завжди хоча б один рядок
 onType();
 onCat();
 buildPreview();
