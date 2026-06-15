@@ -133,6 +133,17 @@
   .subh:first-of-type{border-top:none;padding-top:0;margin-top:6px}
   .subh small{font-weight:500;color:var(--mut)}
   @media(max-width:560px){.cgroup-head,.crow{grid-template-columns:1fr 64px 92px;gap:7px}}
+
+  /* CUSTOM EXTRA FIELDS (додавання полів у блок) */
+  .extras{margin-top:14px;padding-top:14px;border-top:1px dashed var(--line);display:flex;flex-direction:column;gap:8px}
+  .xrow{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.2fr) 38px;gap:8px;align-items:center}
+  .xrow input{font-size:14px;padding:9px 11px}
+  .xrow .xname{font-weight:600}
+  .xdel{cursor:pointer;border:1.5px solid var(--line);background:#fff;color:#c0392b;border-radius:9px;height:38px;font-size:16px;font-weight:700;line-height:1}
+  .xdel:hover{border-color:#c0392b;background:#fdecea}
+  .addx{align-self:flex-start;cursor:pointer;border:1.5px dashed #bcd8c7;background:var(--green-l);color:var(--green-d);font-weight:700;font-size:13.5px;padding:9px 16px;border-radius:10px;font-family:inherit}
+  .addx:hover{border-color:var(--accent);background:#dcefe6}
+  .xhint{font-size:11.5px;color:var(--mut);margin-top:-2px}
 </style>
 </head>
 <body>
@@ -170,7 +181,7 @@
   </div>
 
   <!-- 1. БАЗА -->
-  <section class="card">
+  <section class="card" data-block="Класифікація" data-pv="top">
     <div class="sec-h"><span class="sec-n">1</span><span class="sec-t">Класифікація</span></div>
     <p class="sec-d">Основа, за якою клієнт відфільтровує товар.</p>
     <div class="grid">
@@ -220,7 +231,7 @@
   </section>
 
   <!-- 2. ПАРАМЕТРИ -->
-  <section class="card">
+  <section class="card" data-block="Параметри" data-pv="top">
     <div class="sec-h"><span class="sec-n">2</span><span class="sec-t">Фізичні параметри лоту</span></div>
     <p class="sec-d">Дають клієнту порахувати собівартість одиниці — головний аргумент при покупці.</p>
     <div class="grid">
@@ -233,7 +244,7 @@
   </section>
 
   <!-- 3. НАПОВНЕННЯ -->
-  <section class="card">
+  <section class="card" data-block="Наповнення" data-pv="details">
     <div class="sec-h"><span class="sec-n">3</span><span class="sec-t">Наповнення лоту</span></div>
     <p class="sec-d">Що саме людина отримає, відкривши мішок. Дивіться весь лот і відповідайте якомога конкретніше.</p>
     <div class="grid">
@@ -253,7 +264,7 @@
   </section>
 
   <!-- 4. РОЗМІРИ (тільки одяг) -->
-  <section class="card clothing-only" style="display:none">
+  <section class="card clothing-only" style="display:none" data-block="Розміри" data-pv="details">
     <div class="sec-h"><span class="sec-n">4</span><span class="sec-t">Розміри</span></div>
     <p class="sec-d">Перерахуйте одиниці по розмірних групах. Система сама порахує відсоток від загальної кількості — поле «%» можна редагувати.</p>
     <div class="grid one">
@@ -271,7 +282,7 @@
   </section>
 
   <!-- 5. ТИП ВИРОБУ, ФАСОНИ, КОЛЬОРИ (тільки одяг) -->
-  <section class="card clothing-only" style="display:none">
+  <section class="card clothing-only" style="display:none" data-block="Фасони" data-pv="details">
     <div class="sec-h"><span class="sec-n">5</span><span class="sec-t">Тип виробу, фасони та кольори</span></div>
     <p class="sec-d">Оберіть тип виробу — зʼявляться конкретні запитання саме для нього. Вводьте кількість, відсоток рахується сам.</p>
     <div class="grid">
@@ -325,7 +336,7 @@
   </section>
 
   <!-- 6. СТАН ТА ЯКІСТЬ -->
-  <section class="card">
+  <section class="card" data-block="Стан" data-pv="state">
     <div class="sec-h"><span class="sec-n">6</span><span class="sec-t">Стан та якість</span></div>
     <p class="sec-d">Найважливіше для секонду — наскільки товар свіжий і в якому він стані.</p>
     <div class="grid">
@@ -345,7 +356,7 @@
   </section>
 
   <!-- 7. ДЕФЕКТИ (тільки одяг) -->
-  <section class="card clothing-only" style="display:none">
+  <section class="card clothing-only" style="display:none" data-block="Дефекти" data-pv="state">
     <div class="sec-h"><span class="sec-n">7</span><span class="sec-t">Дефекти</span></div>
     <p class="sec-d">Кожен вид дефекту — окреме поле. Вводьте кількість бракованих одиниць, відсоток від загальної кількості рахується сам (можна редагувати).</p>
     <div id="host-defects"></div>
@@ -356,19 +367,43 @@
   </section>
 
   <!-- 8. КАТЕГОРІЙНІ -->
-  <section class="card" id="catCard" style="display:none">
+  <section class="card" id="catCard" style="display:none" data-block="Категорія" data-pv="details">
     <div class="sec-h"><span class="sec-n">8</span><span class="sec-t">Деталі по категорії</span></div>
     <p class="sec-d">Зʼявляться запитання, специфічні для обраної категорії.</p>
     <span class="cat-badge" id="catBadge"></span>
 
     <!-- ВЗУТТЯ -->
     <div class="cat-block" data-cat="Взуття">
-      <div class="grid">
-        <div class="field"><label>Тип взуття</label><input type="text" name="Тип взуття" placeholder="кросівки, туфлі, шльопанці, гумове"></div>
-        <div class="field"><label>Бренди всередині</label><input type="text" name="Бренди взуття" placeholder="Adidas, Reebok, Polo..."></div>
-        <div class="field full"><label>Діапазон розмірів + які переважають</label><textarea name="Розміри взуття" placeholder="напр.: 37-46, найбільше 37-38 (4шт), 39 (5), 43/44 (3)"></textarea></div>
+      <p class="sec-d" style="margin-left:0">Вводьте кількість пар — відсоток рахується автоматично. Поле «%» можна редагувати.</p>
+      <div class="subh">Тип взуття <small>— кількість пар</small></div>
+      <div id="host-shoe-type"></div>
+
+      <div class="grid one" style="margin-top:12px">
+        <div class="field full"><label>Розмірний діапазон <small>для рядка «Розміри» в описі</small></label>
+          <input type="text" name="Розмірний діапазон взуття" placeholder="напр.: 36-46"></div>
+      </div>
+      <div class="subh">Розподіл за розмірами (EU)</div>
+      <div id="host-shoe-size"></div>
+
+      <div class="subh">Матеріал верху</div>
+      <div id="host-shoe-material"></div>
+
+      <div class="subh">Стать / призначення</div>
+      <div id="host-shoe-gender"></div>
+
+      <div class="subh">Дефекти <small>— % від усіх пар</small></div>
+      <div id="host-shoe-defects"></div>
+
+      <div class="grid" style="margin-top:14px">
+        <div class="field"><label>Бренди всередині <small>через кому</small></label><input type="text" name="Бренди взуття" placeholder="Adidas, Reebok, Geox, ECCO..."></div>
         <div class="field"><label>Парність</label>
-          <select name="Парність"><option value="">—</option><option>Все парне</option><option>Можливі непарні</option></select></div>
+          <select name="Парність"><option value="">—</option><option>Все парне</option><option>Можливі непарні</option><option>Тільки непарні (вітрина)</option></select></div>
+        <div class="field"><label>Сезонність взуття</label>
+          <select name="Сезонність взуття"><option value="">—</option><option>Літо</option><option>Демісезон</option><option>Зима</option><option>Мікс сезонів</option></select></div>
+        <div class="field"><label>Усього оглянуто пар <small>авто = сума розмірів</small></label>
+          <input type="number" min="0" inputmode="numeric" id="totalPairs" name="Усього пар" placeholder="напр.: 24"></div>
+        <div class="field full"><label>Коментар до взуття <small>нестандартні випадки</small></label>
+          <textarea name="Коментар: Взуття" placeholder="напр.: трапляються поодинокі дитячі пари; кілька брендових кросівок"></textarea></div>
       </div>
     </div>
 
@@ -502,7 +537,13 @@ const COUNTER_GROUPS = {
   "host-sweater-pattern": {group:"Малюнок кофт",     base:"sum",   fmt:"label_pct",   rows:["однотонні","з принтом / написом"]},
   "host-sweater-feat":    {group:"Особливості кофт", base:"total", fmt:"label_pct",   rows:["з капюшоном","на блискавці","в'язані","утеплені / на флісі"]},
   // дефекти
-  "host-defects":         {group:"Дефекти",          base:"total", fmt:"pct_label",   rows:["плями","дірки","затертий принт","затерта тканина","затяжки / зачіпки","катишки","жовтизна / під пахвами","дефект шва","зламана блискавка","відсутні ґудзики"]}
+  "host-defects":         {group:"Дефекти",          base:"total", fmt:"pct_label",   rows:["плями","дірки","затертий принт","затерта тканина","затяжки / зачіпки","катишки","жовтизна / під пахвами","дефект шва","зламана блискавка","відсутні ґудзики"]},
+  // взуття
+  "host-shoe-type":       {group:"Тип взуття",       base:"sum",   fmt:"label_pct",   rows:["кросівки / кеди","туфлі","черевики / ботильйони","чоботи","босоніжки / сандалі","шльопанці / в'єтнамки","балетки / мокасини","гумові чоботи","домашні капці","спортивне (бутси, треки)"]},
+  "host-shoe-size":       {group:"Розміри взуття",   base:"sum",   fmt:"label_colon", rows:["≤36","37-38","39-40","41-42","43-44","45+"]},
+  "host-shoe-material":   {group:"Матеріал верху",   base:"sum",   fmt:"label_pct",   rows:["натуральна шкіра","замша / нубук","екошкіра / шкірзам","текстиль","гума / EVA"]},
+  "host-shoe-gender":     {group:"Стать взуття",     base:"sum",   fmt:"label_pct",   rows:["чоловіче","жіноче","дитяче","унісекс"]},
+  "host-shoe-defects":    {group:"Дефекти взуття",   base:"total", fmt:"pct_label",   rows:["стерта підошва","потертості верху","відклеєна підошва","відсутні шнурки / устілки","плями / забруднення","деформація / залом"]}
 };
 const SIZE_GROUP = "Розміри"; // сума цієї групи = «Усього одиниць» за замовч.
 /* ========================================================= */
@@ -609,6 +650,7 @@ function renderCounters(){
     const def = COUNTER_GROUPS[hostId];
     const g = document.createElement("div");
     g.className = "cgroup"; g.dataset.group = def.group; g.dataset.base = def.base; g.dataset.fmt = def.fmt;
+    g.dataset.totalsrc = hostId.indexOf("host-shoe")===0 ? "shoe" : "clothing";
     g.innerHTML = '<div class="cgroup-head"><span>Позиція</span><span>К-сть</span><span>%</span></div>';
     def.rows.forEach(label=>{
       const row = document.createElement("div"); row.className="crow";
@@ -632,34 +674,39 @@ function toRange(v){
   return lo+"-"+hi+"%";
 }
 
-/* Загальна кількість одиниць: поле #totalUnits, що авто-дорівнює сумі розмірів */
-function sizeSum(){
-  const g = document.querySelector('.cgroup[data-group="'+SIZE_GROUP+'"]');
+/* Сума кількостей у групі за назвою */
+function groupSum(groupName){
+  const g = document.querySelector('.cgroup[data-group="'+groupName+'"]');
   if(!g) return 0;
   let s=0; g.querySelectorAll(".ccount").forEach(i=>{ const v=parseFloat(i.value); if(!isNaN(v)) s+=v; });
   return s;
 }
-function totalUnits(){
-  const f = $("#totalUnits");
+function sizeSum(){ return groupSum(SIZE_GROUP); }                 // одяг
+function pairsSum(){ return groupSum("Розміри взуття"); }          // взуття
+function manualOr(id, fallback){
+  const f = document.getElementById(id);
   const man = f ? parseFloat(f.value) : NaN;
-  if(!isNaN(man) && man>0) return man;
-  return sizeSum();
+  return (!isNaN(man) && man>0) ? man : fallback;
 }
+function totalUnits(){ return manualOr("totalUnits", sizeSum()); }
+function totalPairs(){ return manualOr("totalPairs", pairsSum()); }
 function groupBase(g){
-  if(g.dataset.base==="total") return totalUnits();
+  if(g.dataset.base==="total") return g.dataset.totalsrc==="shoe" ? totalPairs() : totalUnits();
   let s=0; g.querySelectorAll(".ccount").forEach(i=>{ const v=parseFloat(i.value); if(!isNaN(v)) s+=v; });
   return s;
 }
 
 /* Перерахунок усіх груп. Поле % не перетирається, якщо користувач його редагував (dirty) */
-function recalcCounters(){
-  // синхронізувати #totalUnits із сумою розмірів, якщо його не чіпали вручну
-  const tu = $("#totalUnits");
+function syncTotal(id, sum){
+  const tu = document.getElementById(id);
   if(tu && !tu.dataset.dirty){
-    const s = sizeSum();
-    tu.value = s>0 ? s : "";
-    if(s>0) tu.classList.add("auto-filled"); else tu.classList.remove("auto-filled");
+    tu.value = sum>0 ? sum : "";
+    if(sum>0) tu.classList.add("auto-filled"); else tu.classList.remove("auto-filled");
   }
+}
+function recalcCounters(){
+  syncTotal("totalUnits", sizeSum());   // одяг
+  syncTotal("totalPairs", pairsSum());  // взуття
   $$(".cgroup").forEach(g=>{
     const base = groupBase(g);
     g.querySelectorAll(".crow").forEach(row=>{
@@ -696,15 +743,85 @@ function groupSummary(groupName){
   return parts.join(", ");
 }
 
-/* Делегування подій лічильників (вони додаються в DOM динамічно) */
+/* Делегування подій лічильників + кастомних полів (додаються в DOM динамічно) */
 document.addEventListener("input", e=>{
   const t=e.target;
   if(t.classList.contains("cpct")){ t.dataset.dirty="1"; t.classList.add("dirty"); }
-  if(t.id==="totalUnits"){ t.dataset.dirty = t.value.trim()?"1":""; }
-  if(t.classList.contains("ccount") || t.classList.contains("cpct") || t.id==="totalUnits"){
+  if(t.id==="totalUnits" || t.id==="totalPairs"){ t.dataset.dirty = t.value.trim()?"1":""; }
+  if(t.classList.contains("ccount") || t.classList.contains("cpct") ||
+     t.id==="totalUnits" || t.id==="totalPairs" ||
+     t.classList.contains("xname") || t.classList.contains("xval")){
     buildPreview(); saveDraft();
   }
 });
+/* Кнопки «+ Додати поле» та видалення кастомного рядка */
+document.addEventListener("click", e=>{
+  const add=e.target.closest(".addx");
+  if(add){ addXRow(add.closest("section.card").querySelector(".extras"), "", "", true); return; }
+  const del=e.target.closest(".xdel");
+  if(del){ del.closest(".xrow").remove(); buildPreview(); saveDraft(); }
+});
+
+/* ====================== КАСТОМНІ ПОЛЯ ====================== */
+/* У кожен блок [data-block] додаємо контейнер .extras і кнопку «+ Додати поле» */
+function initExtras(){
+  $$('section.card[data-block]').forEach(card=>{
+    if(card.querySelector(".extras")) return;
+    const box=document.createElement("div"); box.className="extras";
+    const hint=document.createElement("div"); hint.className="xhint";
+    hint.textContent="Свої характеристики цього блоку (назва + значення)";
+    const btn=document.createElement("button"); btn.type="button"; btn.className="addx"; btn.textContent="+ Додати поле";
+    box.appendChild(hint); box.appendChild(btn);
+    card.appendChild(box);
+  });
+}
+function addXRow(box, name, val, focus){
+  if(!box) return;
+  const row=document.createElement("div"); row.className="xrow";
+  row.innerHTML='<input class="xname" type="text" placeholder="Назва характеристики">'+
+                '<input class="xval" type="text" placeholder="Значення">'+
+                '<button class="xdel" type="button" title="Видалити">✕</button>';
+  const btn=box.querySelector(".addx");
+  box.insertBefore(row, btn);
+  if(name) row.querySelector(".xname").value=name;
+  if(val)  row.querySelector(".xval").value=val;
+  if(focus) row.querySelector(".xname").focus();
+  return row;
+}
+/* Кастомні поля → відро для прев'ю за data-pv ("top"/"details"/"state") */
+function extrasByPv(){
+  const b={top:[],details:[],state:[]};
+  $$('section.card[data-block]').forEach(card=>{
+    if(card.style.display==="none") return;
+    const pv=card.dataset.pv||"details";
+    card.querySelectorAll(".xrow").forEach(r=>{
+      const n=r.querySelector(".xname").value.trim(), v=r.querySelector(".xval").value.trim();
+      if(n && v) (b[pv]||b.details).push([n,v]);
+    });
+  });
+  return b;
+}
+/* Стан кастомних полів для чернетки, згруповано за блоком */
+function extrasState(){
+  const o={};
+  $$('section.card[data-block]').forEach(card=>{
+    const rows=[];
+    card.querySelectorAll(".xrow").forEach(r=>{
+      const n=r.querySelector(".xname").value, v=r.querySelector(".xval").value;
+      if(n || v) rows.push([n,v]);
+    });
+    if(rows.length) o[card.dataset.block]=rows;
+  });
+  return o;
+}
+function restoreExtras(o){
+  if(!o) return;
+  $$('section.card[data-block]').forEach(card=>{
+    const rows=o[card.dataset.block]; if(!rows) return;
+    const box=card.querySelector(".extras");
+    rows.forEach(([n,v])=>addXRow(box,n,v,false));
+  });
+}
 
 /* ---------- КАТЕГОРІЙНІ БЛОКИ ---------- */
 function onType(){
@@ -757,8 +874,8 @@ function collect(){
     data[r.name]=r.value;
   });
   // структуровані рядки з лічильників → окремі колонки в таблиці
+  const put=(k,v)=>{ if(v) data[k]=v; };
   if(data["Категорія"]==="Одяг"){
-    const put=(k,v)=>{ if(v) data[k]=v; };
     put("Кольори", groupSummary("Кольори"));
     put("Фасони", fasonString(data));
     put("Розміри детально", groupSummary("Розміри"));
@@ -766,6 +883,23 @@ function collect(){
     if(data["Коментар: Дефекти"]) def = [def, data["Коментар: Дефекти"]].filter(Boolean).join("; ");
     put("Дефекти", def);
   }
+  if(data["Категорія"]==="Взуття"){
+    put("Тип взуття", groupSummary("Тип взуття"));
+    put("Розміри взуття", groupSummary("Розміри взуття"));
+    put("Матеріал верху", groupSummary("Матеріал верху"));
+    put("Стать взуття", groupSummary("Стать взуття"));
+    let def = groupSummary("Дефекти взуття");
+    if(data["Коментар: Взуття"]) def = [def, data["Коментар: Взуття"]].filter(Boolean).join("; ");
+    put("Дефекти", def);
+  }
+  // кастомні поля користувача → колонки за назвою характеристики
+  $$('section.card[data-block]').forEach(card=>{
+    if(card.style.display==="none") return;
+    card.querySelectorAll(".xrow").forEach(r=>{
+      const n=r.querySelector(".xname").value.trim(), v=r.querySelector(".xval").value.trim();
+      if(n && v) data[n]=v;
+    });
+  });
   return data;
 }
 
@@ -783,17 +917,20 @@ function fasonString(d){
 function buildPreview(){
   recalcCounters();
   const d = collect();
+  const cat = d["Категорія"];
+  const ex = extrasByPv();
   const L=[];
   const add=(k,v)=>{ if(v) L.push("✔️ "+k+": "+v); };
-  add("Сезон", d["Сезон"]);
+  add("Сезон", d["Сезон"]||d["Сезонність взуття"]);
   add("Сорт", d["Сорт"]);
-  add("Стать", d["Стать/вік"]);
+  add("Стать", d["Стать/вік"]||groupSummary("Стать взуття"));
   add("Бренд", d["Бренд/збірка"]);
   add("Країна", d["Країна"]);
-  add("Розміри", d["Розмірний діапазон"]||d["Розміри взуття"]);
+  add("Розміри", d["Розмірний діапазон"]||d["Розмірний діапазон взуття"]);
   add("Кількість одиниць", d["Кількість одиниць"]);
   add("Вага одиниці", d["Вага одиниці"]);
   add("Вага лота", d["Точна вага лота"] ? (String(d["Точна вага лота"]).replace(".",",")+" кг") : d["Вага лота"]);
+  ex.top.forEach(([n,v])=>L.push("✔️ "+n+": "+v));
   let txt = (d["Номенклатура"]? d["Номенклатура"]+"\n\n":"") + L.join("\n");
 
   // НАПОВНЕННЯ
@@ -805,15 +942,25 @@ function buildPreview(){
   const det=[];
   const addd=(k,v)=>{ if(v) det.push(k+": "+v); };
   addd("переважають", d["Переважають"]);
-  addd("кольори", groupSummary("Кольори"));
-  addd("фасони", fasonString(d));
-  let sizes = groupSummary("Розміри");
-  if(d["Коментар: Розміри"]) sizes = [sizes, d["Коментар: Розміри"]].filter(Boolean).join(" — ");
-  addd("розміри", sizes);
-  addd("матеріал", d["Матеріал"]);
-  addd("бренди", d["Бренди всередині"]);
+  if(cat==="Взуття"){
+    addd("тип взуття", groupSummary("Тип взуття"));
+    addd("розміри", groupSummary("Розміри взуття"));
+    addd("матеріал верху", groupSummary("Матеріал верху"));
+    addd("парність", d["Парність"]);
+    addd("бренди", d["Бренди взуття"]);
+    if(d["Коментар: Взуття"]) det.push("примітка: "+d["Коментар: Взуття"]);
+  } else {
+    addd("кольори", groupSummary("Кольори"));
+    addd("фасони", fasonString(d));
+    let sizes = groupSummary("Розміри");
+    if(d["Коментар: Розміри"]) sizes = [sizes, d["Коментар: Розміри"]].filter(Boolean).join(" — ");
+    addd("розміри", sizes);
+    addd("матеріал", d["Матеріал"]);
+    addd("бренди", d["Бренди всередині"]);
+    if(d["Коментар: Фасони"]) det.push("примітка: "+d["Коментар: Фасони"]);
+  }
   addd("особливе", d["Особливі позиції"]);
-  if(d["Коментар: Фасони"]) det.push("примітка: "+d["Коментар: Фасони"]);
+  ex.details.forEach(([n,v])=>det.push(n+": "+v));
   if(det.length) txt += "\n\n✔️ Деталі: "+det.join("; ")+".";
 
   // СТАН І ЯКІСТЬ
@@ -823,12 +970,14 @@ function buildPreview(){
   adds("з бирками", d["З бирками"]);
   adds("нове без бирок", d["Нове без бирок"]);
   adds("чистота", d["Чистота"]);
-  let defects = groupSummary("Дефекти");
-  if(d["Коментар: Дефекти"]) defects = [defects, d["Коментар: Дефекти"]].filter(Boolean).join("; ");
-  if(!defects && (d["Категорія"]==="Одяг")) defects = "без значних дефектів";
+  let defects = (cat==="Взуття") ? groupSummary("Дефекти взуття") : groupSummary("Дефекти");
+  const defComment = (cat==="Взуття") ? d["Коментар: Взуття"] : d["Коментар: Дефекти"];
+  if(cat!=="Взуття" && defComment) defects = [defects, defComment].filter(Boolean).join("; ");
+  if(!defects && (cat==="Одяг"||cat==="Взуття")) defects = "без значних дефектів";
   adds("дефекти", defects);
   adds("пакування", d["Пакування"]);
   if(d["Коментар: Стан"]) st.push("примітка: "+d["Коментар: Стан"]);
+  ex.state.forEach(([n,v])=>st.push(n+": "+v));
   if(st.length) txt += "\n\n✔️ Стан і якість: "+st.join("; ")+".";
 
   $("#preview").textContent = txt.trim() || "Заповніть поля вище…";
@@ -869,7 +1018,9 @@ function saveDraft(){
   try{
     const d=collect();
     const tu=$("#totalUnits"); if(tu && !tu.dataset.dirty) delete d["Усього одиниць"]; // авто — не зберігаємо
+    const tp=$("#totalPairs"); if(tp && !tp.dataset.dirty) delete d["Усього пар"];
     d.__counters=counterState();
+    d.__extras=extrasState();
     localStorage.setItem(DRAFT, JSON.stringify(d));
     $("#saveState").textContent="Чернетку збережено · "+new Date().toLocaleTimeString("uk");
   }catch(e){}
@@ -878,14 +1029,16 @@ function loadDraft(){
   try{
     const raw=localStorage.getItem(DRAFT); if(!raw) return;
     const d=JSON.parse(raw);
+    restoreExtras(d.__extras); // спершу відновити кастомні поля, щоб їх не перетерло
     for(const k in d){
-      if(k==="__counters") continue;
+      if(k==="__counters"||k==="__extras") continue;
       const els=$$('[name="'+CSS.escape(k)+'"]');
       if(k==="Сорт"){ d[k].split(", ").forEach(v=>{const c=document.querySelector('input[name="Сорт"][value="'+v+'"]'); if(c)c.checked=true;}); continue; }
       if(els.length===1 && els[0].type!=="radio") els[0].value=d[k];
       else els.forEach(e=>{ if(e.value===d[k]) e.checked=true; });
     }
     if(d["Усього одиниць"]){ const tu=$("#totalUnits"); if(tu) tu.dataset.dirty="1"; }
+    if(d["Усього пар"]){ const tp=$("#totalPairs"); if(tp) tp.dataset.dirty="1"; }
     restoreCounters(d.__counters);
     if(d["Артикул"]) $("#code").value=d["Артикул"];
     onType(); onCat(); buildPreview();
@@ -919,6 +1072,7 @@ $("#submitBtn").addEventListener("click", async ()=>{
 });
 
 renderCounters();
+initExtras();
 loadDraft();
 onType();
 onCat();
