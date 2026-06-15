@@ -175,6 +175,10 @@
     <p class="sec-d">Основа, за якою клієнт відфільтровує товар.</p>
     <div class="grid">
       <div class="field full">
+        <label>Штрихкод <small>EAN — відскануйте або введіть вручну</small></label>
+        <input type="text" name="Штрихкод" inputmode="numeric" autocomplete="off" placeholder="напр. 4056233123456">
+      </div>
+      <div class="field full">
         <label>Категорія товару <span class="req">*</span></label>
         <select id="catSelect" name="Категорія">
           <option value="">— оберіть —</option>
@@ -220,7 +224,8 @@
     <div class="sec-h"><span class="sec-n">2</span><span class="sec-t">Фізичні параметри лоту</span></div>
     <p class="sec-d">Дають клієнту порахувати собівартість одиниці — головний аргумент при покупці.</p>
     <div class="grid">
-      <div class="field"><label>Вага лота <small>діапазон</small></label><input type="text" name="Вага лота" placeholder="напр. 18-25 кг"></div>
+      <div class="field"><label>Точна вага лота, кг <small>фактично зважено</small></label><input type="number" min="0" step="0.01" inputmode="decimal" name="Точна вага лота" placeholder="напр. 22,4"></div>
+      <div class="field"><label>Вага лота <small>діапазон, якщо вага плаває</small></label><input type="text" name="Вага лота" placeholder="напр. 18-25 кг"></div>
       <div class="field"><label>Вага однієї одиниці</label><input type="text" name="Вага одиниці" placeholder="напр. 0,4-0,45 кг"></div>
       <div class="field"><label>Кількість одиниць у лоті</label><input type="text" name="Кількість одиниць" placeholder="напр. 2-2,5 шт/кг ≈ 48 шт"></div>
       <div class="field"><label>Собівартість одиниці, грн <small>якщо рахували</small></label><input type="text" name="Собівартість одиниці" placeholder="напр. 102 грн/шт"></div>
@@ -470,6 +475,8 @@ const FIELD_MAP = {
   "Сорт":                ["Сорт"],
   "Пропорція сортів":    ["Пропорція сортів","Пропорция сортов"],
   "Сезон":               ["Сезон"],
+  "Штрихкод":            ["Штрихкод","Штрих-код","Barcode","EAN","Штрихкод лоту"],
+  "Точна вага лота":     ["Точна вага лота","Фактична вага","Вага лота точна"],
   "Вага лота":           ["Вага лота","Вес лота"],
   "Вага одиниці":        ["Вага одиниці","Вес единицы"],
   "Кількість одиниць":   ["Кількість одиниць","Количество единиц"],
@@ -786,7 +793,7 @@ function buildPreview(){
   add("Розміри", d["Розмірний діапазон"]||d["Розміри взуття"]);
   add("Кількість одиниць", d["Кількість одиниць"]);
   add("Вага одиниці", d["Вага одиниці"]);
-  add("Вага лота", d["Вага лота"]);
+  add("Вага лота", d["Точна вага лота"] ? (String(d["Точна вага лота"]).replace(".",",")+" кг") : d["Вага лота"]);
   let txt = (d["Номенклатура"]? d["Номенклатура"]+"\n\n":"") + L.join("\n");
 
   // НАПОВНЕННЯ
