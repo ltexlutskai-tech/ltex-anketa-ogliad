@@ -308,10 +308,11 @@
           <option value="">— оберіть —</option>
           <option value="Футболки">Футболки</option>
           <option value="Кофти">Кофти / світшоти</option>
+          <option value="Флісові кофти">Флісові кофти</option>
           <option value="Інше">Інший одяг</option>
         </select>
       </div>
-      <div class="field"><label>Матеріал / тканина <small>якщо визначається</small></label>
+      <div class="field" id="materialField"><label>Матеріал / тканина <small>якщо визначається</small></label>
         <input type="text" name="Матеріал" placeholder="напр.: бавовна, трикотаж, фліс, в рубчик"></div>
     </div>
 
@@ -336,6 +337,17 @@
       <div id="host-sweater-pattern"></div>
       <div class="subh">Особливості <small>— % від усього лоту</small></div>
       <div id="host-sweater-feat"></div>
+    </div>
+
+    <!-- ФЛІСОВІ КОФТИ (вузький пресет: усе фліс, питаємо лише релевантне) -->
+    <div class="ptype-block" data-ptype="Флісові кофти" style="display:none">
+      <p class="sec-d" style="margin-left:0">Уся позиція — фліс. Матеріал не питаємо. Вводьте кількість одиниць по кожній ознаці, % рахується сам.</p>
+      <div class="subh">Фасон за застібкою</div>
+      <div id="host-fleece-closure"></div>
+      <div class="subh">Капюшон</div>
+      <div id="host-fleece-hood"></div>
+      <div class="subh">Особливості флісу <small>— % від усього лоту</small></div>
+      <div id="host-fleece-feat"></div>
     </div>
 
     <!-- ІНШЕ -->
@@ -563,6 +575,10 @@ const COUNTER_GROUPS = {
   "host-sweater-type":    {group:"Тип кофти",        base:"sum",   fmt:"label_pct",   rows:["худі","світшот","реглан","джемпер / светр","кардиган","водолазка","фліска","лонгслів","жилет"]},
   "host-sweater-pattern": {group:"Малюнок кофт",     base:"sum",   fmt:"label_pct",   rows:["однотонні","з принтом / написом"]},
   "host-sweater-feat":    {group:"Особливості кофт", base:"total", fmt:"label_pct",   rows:["з капюшоном","на блискавці","в'язані","утеплені / на флісі"]},
+  // флісові кофти (вузький пресет)
+  "host-fleece-closure":  {group:"Застібка флісу",   base:"sum",   fmt:"label_pct",   rows:["світшот (без застібки)","напівзамок (короткий зіп)","повна блискавка","на ґудзиках / кнопках"]},
+  "host-fleece-hood":     {group:"Капюшон флісу",    base:"sum",   fmt:"label_pct",   rows:["з капюшоном","без капюшона (комір-стійка)"]},
+  "host-fleece-feat":     {group:"Особливості флісу",base:"total", fmt:"label_pct",   rows:["з кишенями на блискавці","плюшевий / шерпа","двосторонній фліс","жилет (без рукавів)","з утепленою підкладкою","однотонні","з принтом / смужкою"]},
   // дефекти
   "host-defects":         {group:"Дефекти",          base:"total", fmt:"pct_label",   rows:["плями","дірки","затертий принт","затерта тканина","затяжки / зачіпки","катишки","жовтизна / під пахвами","дефект шва","зламана блискавка","відсутні ґудзики"]},
   // взуття
@@ -947,6 +963,8 @@ function applyPrevail(){
 function onType(){
   const t = $("#prodType") ? $("#prodType").value : "";
   $$(".ptype-block").forEach(b=>b.style.display = (b.dataset.ptype===t)?"block":"none");
+  // флісові кофти — матеріал відомий (фліс), не питаємо
+  const mf=$("#materialField"); if(mf) mf.style.display = (t==="Флісові кофти") ? "none" : "";
 }
 function renumber(){
   let n=0;
@@ -1002,6 +1020,7 @@ function collect(){
   put("Наповнення", fillSummary());
   put("Переважають", (document.querySelector('[name="Переважають"]')||{}).value || "");
   put("Новизна", groupSummary("Новизна"));
+  if(data["Тип виробу"]==="Флісові кофти") data["Матеріал"]="фліс";
   if(data["Категорія"]==="Одяг"){
     put("Кольори", groupSummary("Кольори"));
     put("Фасони", fasonString(data));
@@ -1037,6 +1056,9 @@ function fasonString(d){
   }
   if(t==="Кофти"){
     return [groupSummary("Тип кофти"), groupSummary("Малюнок кофт"), groupSummary("Особливості кофт")].filter(Boolean).join(", ");
+  }
+  if(t==="Флісові кофти"){
+    return [groupSummary("Застібка флісу"), groupSummary("Капюшон флісу"), groupSummary("Особливості флісу")].filter(Boolean).join(", ");
   }
   return d["Фасони вручну"]||"";
 }
