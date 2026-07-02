@@ -129,6 +129,8 @@
   .crow .cpct::placeholder{font-weight:400;color:#9fb1a7}
   .gsum{font-size:12px;color:var(--mut);margin-top:4px}
   .gsum b{color:var(--green-d)}
+  .gsum.warn{color:var(--warn)}
+  .gsum.warn b{color:var(--warn)}
   .subh{font-size:13.5px;font-weight:700;color:var(--green-d);margin:16px 0 2px;padding-top:14px;border-top:1px dashed var(--line)}
   .subh:first-of-type{border-top:none;padding-top:0;margin-top:6px}
   .subh small{font-weight:500;color:var(--mut)}
@@ -773,7 +775,7 @@ function renderCounters(){
     g.innerHTML = '<div class="cgroup-head"><span>Позиція</span><span>К-сть</span><span>%</span>'+(def.editable?'<span></span>':'')+'</div>';
     def.rows.forEach(label=> g.appendChild(buildCrow(def.editable, label)));
     host.appendChild(g);
-    if(def.base==="sum"){ const s=document.createElement("div"); s.className="gsum"; host.appendChild(s); }
+    { const s=document.createElement("div"); s.className="gsum"; host.appendChild(s); }
     if(def.editable){
       const b=document.createElement("button");
       b.type="button"; b.className="caddrow addx"; b.textContent="+ критерій";
@@ -804,7 +806,7 @@ function manualOr(id, fallback){
   const man = f ? parseFloat(f.value) : NaN;
   return (!isNaN(man) && man>0) ? man : fallback;
 }
-function totalUnits(){ return manualOr("totalUnits", sizeSum()); }
+function totalUnits(){ return manualOr("totalUnits", sizeSum() || groupSum("Склад міксу")); }
 function totalPairs(){ return manualOr("totalPairs", pairsSum()); }
 function groupBase(g){
   if(g.dataset.base==="total") return g.dataset.totalsrc==="shoe" ? totalPairs() : totalUnits();
@@ -821,7 +823,7 @@ function syncTotal(id, sum){
   }
 }
 function recalcCounters(){
-  syncTotal("totalUnits", sizeSum());   // одяг
+  syncTotal("totalUnits", sizeSum() || groupSum("Склад міксу"));   // одяг
   syncTotal("totalPairs", pairsSum());  // взуття
   $$(".cgroup").forEach(g=>{
     const base = groupBase(g);
@@ -832,11 +834,20 @@ function recalcCounters(){
       if(isNaN(v) || v<=0 || base<=0){ p.value=""; return; }
       p.value = toRange(v/base*100);
     });
-    // підсумок суми для груп base=sum
+    // підсумок / підказка під групою
     const sumEl = g.parentElement.querySelector(".gsum");
     if(sumEl){
       let s=0,n=0; g.querySelectorAll(".ccount").forEach(i=>{ const v=parseFloat(i.value); if(!isNaN(v)){s+=v;n++;} });
-      sumEl.innerHTML = n? ("Разом порахо́вано: <b>"+s+" шт</b>") : "";
+      if(g.dataset.base==="total"){
+        // «total» — % приблизно від загальної кількості лоту (позиції можуть пересікатись)
+        if(n && base>0)   sumEl.innerHTML = "% — приблизно від загальної кількості <b>"+base+" шт</b> (позиції можуть пересікатись)";
+        else if(n)        sumEl.innerHTML = "⚠️ Щоб порахувати %, вкажіть «Усього одиниць» у лоті (або заповніть розміри / склад міксу).";
+        else              sumEl.innerHTML = "";
+        sumEl.classList.toggle("warn", !!(n && base<=0));
+      } else {
+        sumEl.innerHTML = n ? ("Разом порахо́вано: <b>"+s+" шт</b>") : "";
+        sumEl.classList.remove("warn");
+      }
     }
   });
 }
@@ -1204,6 +1215,12 @@ function buildPreview(){
   $("#preview").textContent = txt.trim() || "Заповніть поля вище…";
 }
 $$('input,select,textarea').forEach(el=>el.addEventListener("input", ()=>{ buildPreview(); saveDraft(); }));
+/* Позначити «Усього одиниць/пар» як ручне ДО того, як syncTotal встигне перетерти ввід
+   (capture-фаза спрацьовує раніше за звичайні input-слухачі) */
+["totalUnits","totalPairs"].forEach(id=>{
+  const el=document.getElementById(id);
+  if(el) el.addEventListener("input", ()=>{ el.dataset.dirty = el.value.trim()?"1":""; }, true);
+});
 
 $("#copyBtn").addEventListener("click", ()=>{
   const txt=$("#preview").textContent;
