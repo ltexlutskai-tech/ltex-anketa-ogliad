@@ -317,6 +317,7 @@
       <div class="field"><label>Тип виробу <span class="req">*</span></label>
         <select id="prodType" name="Тип виробу">
           <option value="">— оберіть —</option>
+          <option value="Спортивний мікс">Спортивний мікс (різні типи)</option>
           <option value="Мікс одягу">Мікс одягу (різні типи)</option>
           <option value="Футболки">Футболки</option>
           <option value="Кофти">Кофти / світшоти</option>
@@ -330,6 +331,19 @@
 
     <div class="subh">Колірна гама <small>— кількість, шт</small></div>
     <div id="host-colors"></div>
+
+    <!-- СПОРТИВНИЙ МІКС (пресет під лот спортивного одягу; кожен критерій можна вилучити або додати свій) -->
+    <div class="ptype-block" data-ptype="Спортивний мікс" style="display:none">
+      <p class="sec-d" style="margin-left:0">Лот — мікс спортивного одягу (актив-вер, тренувальне, вулична спортивка). Нижче — перелік критеріїв саме під спорт: зайві рядки видаляйте кнопкою ✕, свої додавайте кнопкою «+ критерій». Вписуйте кількість одиниць — відсоток порахується сам.</p>
+      <div class="subh">Склад спортивного міксу <small>— типи речей, сума = 100%</small></div>
+      <div id="host-sport-type"></div>
+      <div class="subh">Співвідношення верх / низ <small>— сума = 100%</small></div>
+      <div id="host-sport-topbottom"></div>
+      <div class="subh">Тканина / технологія <small>— % від усього лоту</small></div>
+      <div id="host-sport-fabric"></div>
+      <div class="subh">Фасони та деталі <small>— % від усього лоту</small></div>
+      <div id="host-sport-detail"></div>
+    </div>
 
     <!-- МІКС ОДЯГУ (максимальний набір критеріїв; кожен критерій можна вилучити або додати свій) -->
     <div class="ptype-block" data-ptype="Мікс одягу" style="display:none">
@@ -592,7 +606,7 @@ const COUNTER_GROUPS = {
   "host-sorts":           {group:"Сорти",            base:"sum",   fmt:"label_pct",   rows:["Екстра","Крем","1-й сорт","2-й сорт","Сток"]},
   "host-gender":          {group:"Стать",            base:"sum",   fmt:"label_pct",   rows:["Чоловіче","Жіноче","Дитяче","Унісекс"]},
   "host-tags":            {group:"Новизна",          base:"sum",   fmt:"pct_label",   rows:["з бирками (нове)","нове без бирок","вживане — відмінне","вживане — сліди носки"]},
-  "host-sizes":           {group:"Розміри",          base:"sum",   fmt:"label_colon", editable:true, rows:["L","XL","XXL","3XL","4XL та більші"]},
+  "host-sizes":           {group:"Розміри",          base:"sum",   fmt:"label_colon", editable:true, rows:["XS-S","M","L","XL-2XL","3XL та більше"]},
   "host-colors":          {group:"Кольори",          base:"sum",   fmt:"pct_label",   editable:true, rows:["темні тона","кольорові тона"]},
   // футболки
   "host-tshirt-pattern":  {group:"Малюнок",          base:"sum",   fmt:"label_pct",   editable:true, rows:["однотонні","з принтом"]},
@@ -608,6 +622,11 @@ const COUNTER_GROUPS = {
   "host-fleece-fabric":   {group:"Тип флісу",        base:"sum",   fmt:"label_pct",   editable:true, rows:["класичний (гладкий)","плюшевий / шерпа","щільний з начосом"]},
   "host-fleece-pattern":  {group:"Малюнок флісу",    base:"sum",   fmt:"label_pct",   editable:true, rows:["однотонні","з принтом / камуфляж / смужка"]},
   "host-fleece-feat":     {group:"Особливості флісу",base:"total", fmt:"label_pct",   editable:true, rows:["жилет (без рукавів)","кишені на блискавці","кишеня-кенгуру","двосторонній фліс","утеплена підкладка"]},
+  // спортивний мікс (пресет під лот спортивного одягу; усе можна вилучати/додавати)
+  "host-sport-type":      {group:"Склад спорт-міксу",base:"sum",   fmt:"label_pct",   editable:true, rows:["футболки / джерсі","майки / безрукавки","лонгсліви / термо","поло спортивне","худі / світшоти","олімпійки (track jacket)","вітровки / анораки","спортивні штани / джогери","легінси / тайтси","шорти спортивні","велосипедки / бриджі","жилети утеплені"]},
+  "host-sport-topbottom": {group:"Верх / низ спорт", base:"sum",   fmt:"label_pct",   editable:true, rows:["верх (футболки, худі, олімпійки)","низ (штани, легінси, шорти)"]},
+  "host-sport-fabric":    {group:"Тканина / технологія",base:"total",fmt:"label_pct", editable:true, rows:["вологовідвідна (dry-fit / поліестер)","бавовна / футер","фліс / утеплені","компресійні / термо","сітка / вентиляція (mesh)","плащівка (вітровки)"]},
+  "host-sport-detail":    {group:"Фасони та деталі спорт",base:"total",fmt:"label_pct",editable:true, rows:["з капюшоном","на блискавці (олімпійки)","лампаси / контрастні вставки","світловідбивні елементи","логотип / великий бренд","кишені на блискавці","камуфляж / принт","однотонні"]},
   // мікс одягу (максимальний перелік критеріїв під лот-мікс; усе можна вилучати/додавати)
   "host-mix-type":        {group:"Склад міксу",      base:"sum",   fmt:"label_pct",   editable:true, rows:["сорочки","футболки","поло","джемпери / светри","худі / світшоти","спортивний верх","джинси","штани / чінос","класичні брюки","карго","спортивні штани","шорти"]},
   "host-mix-topbottom":   {group:"Верх / низ",       base:"sum",   fmt:"label_pct",   editable:true, rows:["верх (сорочки, футболки, поло)","низ (штани, джинси, шорти)"]},
@@ -806,7 +825,7 @@ function manualOr(id, fallback){
   const man = f ? parseFloat(f.value) : NaN;
   return (!isNaN(man) && man>0) ? man : fallback;
 }
-function totalUnits(){ return manualOr("totalUnits", sizeSum() || groupSum("Склад міксу")); }
+function totalUnits(){ return manualOr("totalUnits", sizeSum() || groupSum("Склад міксу") || groupSum("Склад спорт-міксу")); }
 function totalPairs(){ return manualOr("totalPairs", pairsSum()); }
 function groupBase(g){
   if(g.dataset.base==="total") return g.dataset.totalsrc==="shoe" ? totalPairs() : totalUnits();
@@ -823,7 +842,7 @@ function syncTotal(id, sum){
   }
 }
 function recalcCounters(){
-  syncTotal("totalUnits", sizeSum() || groupSum("Склад міксу"));   // одяг
+  syncTotal("totalUnits", sizeSum() || groupSum("Склад міксу") || groupSum("Склад спорт-міксу"));   // одяг
   syncTotal("totalPairs", pairsSum());  // взуття
   $$(".cgroup").forEach(g=>{
     const base = groupBase(g);
@@ -1127,6 +1146,9 @@ function collect(){
 /* ---------- ПРЕВ'Ю ОПИСУ ---------- */
 function fasonString(d){
   const t = d["Тип виробу"];
+  if(t==="Спортивний мікс"){
+    return [groupSummary("Склад спорт-міксу"), groupSummary("Верх / низ спорт"), groupSummary("Тканина / технологія"), groupSummary("Фасони та деталі спорт")].filter(Boolean).join(", ");
+  }
   if(t==="Мікс одягу"){
     return [groupSummary("Склад міксу"), groupSummary("Верх / низ"), groupSummary("Фасони та деталі")].filter(Boolean).join(", ");
   }
