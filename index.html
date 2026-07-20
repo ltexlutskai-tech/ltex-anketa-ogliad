@@ -322,6 +322,7 @@
           <option value="Футболки">Футболки</option>
           <option value="Кофти">Кофти / світшоти</option>
           <option value="Флісові кофти">Флісові кофти</option>
+          <option value="Жилетки">Жилетки</option>
           <option value="Інше">Інший одяг</option>
         </select>
       </div>
@@ -389,6 +390,21 @@
       <div id="host-fleece-pattern"></div>
       <div class="subh">Особливості та рідкісне <small>— % від усього лоту</small></div>
       <div id="host-fleece-feat"></div>
+    </div>
+
+    <!-- ЖИЛЕТКИ (безрукавки: утеплені, флісові, костюмні, джинсові тощо) -->
+    <div class="ptype-block" data-ptype="Жилетки" style="display:none">
+      <p class="sec-d" style="margin-left:0">Лот — жилетки (безрукавки). Нижче — перелік критеріїв саме під жилетки: зайві рядки видаляйте кнопкою ✕, свої додавайте кнопкою «+ критерій». Вписуйте кількість одиниць — відсоток порахується сам. У блоках з позначкою «сума = 100%» кожна річ потрапляє лише в один варіант; у блоці «особливості» — рахуйте, скільки одиниць мають цю ознаку.</p>
+      <div class="subh">Тип жилета <small>— сума = 100%</small></div>
+      <div id="host-vest-type"></div>
+      <div class="subh">Утеплення / наповнювач <small>— сума = 100%</small></div>
+      <div id="host-vest-insulation"></div>
+      <div class="subh">Застібка <small>— сума = 100%</small></div>
+      <div id="host-vest-closure"></div>
+      <div class="subh">Малюнок <small>— сума = 100%</small></div>
+      <div id="host-vest-pattern"></div>
+      <div class="subh">Особливості <small>— % від усього лоту</small></div>
+      <div id="host-vest-feat"></div>
     </div>
 
     <!-- ІНШЕ -->
@@ -622,6 +638,12 @@ const COUNTER_GROUPS = {
   "host-fleece-fabric":   {group:"Тип флісу",        base:"sum",   fmt:"label_pct",   editable:true, rows:["класичний (гладкий)","плюшевий / шерпа","щільний з начосом"]},
   "host-fleece-pattern":  {group:"Малюнок флісу",    base:"sum",   fmt:"label_pct",   editable:true, rows:["однотонні","з принтом / камуфляж / смужка"]},
   "host-fleece-feat":     {group:"Особливості флісу",base:"total", fmt:"label_pct",   editable:true, rows:["жилет (без рукавів)","кишені на блискавці","кишеня-кенгуру","двосторонній фліс","утеплена підкладка"]},
+  // жилетки (безрукавки; вузький пресет під позицію)
+  "host-vest-type":       {group:"Тип жилета",       base:"sum",   fmt:"label_pct",   editable:true, rows:["утеплені (пуховик / стьобані)","флісові","softshell / спортивні","костюмні / класичні","джинсові","трикотажні / в'язані","хутряні / зі штучним хутром","робочі / тактичні / сигнальні","дублянки / шкіряні"]},
+  "host-vest-insulation": {group:"Утеплення жилета", base:"sum",   fmt:"label_pct",   editable:true, rows:["пух / холлофайбер","синтепон","фліс","без утеплення (легкі)"]},
+  "host-vest-closure":    {group:"Застібка жилета",  base:"sum",   fmt:"label_pct",   editable:true, rows:["блискавка","ґудзики","кнопки","без застібки"]},
+  "host-vest-pattern":    {group:"Малюнок жилета",   base:"sum",   fmt:"label_pct",   editable:true, rows:["однотонні","стьобані","з принтом / написом","камуфляж"]},
+  "host-vest-feat":       {group:"Особливості жилета",base:"total",fmt:"label_pct",   editable:true, rows:["з капюшоном","кишені на блискавці","хутряна опушка","світловідбивні елементи","двосторонні","кишеня-кенгуру","логотип / великий бренд"]},
   // спортивний мікс (пресет під лот спортивного одягу; усе можна вилучати/додавати)
   "host-sport-type":      {group:"Склад спорт-міксу",base:"sum",   fmt:"label_pct",   editable:true, rows:["футболки / джерсі","майки / безрукавки","лонгсліви / термо","поло спортивне","худі / світшоти","олімпійки (track jacket)","вітровки / анораки","спортивні штани / джогери","легінси / тайтси","шорти спортивні","велосипедки / бриджі","жилети утеплені"]},
   "host-sport-topbottom": {group:"Верх / низ спорт", base:"sum",   fmt:"label_pct",   editable:true, rows:["верх (футболки, худі, олімпійки)","низ (штани, легінси, шорти)"]},
@@ -1160,6 +1182,9 @@ function fasonString(d){
   }
   if(t==="Флісові кофти"){
     return [groupSummary("Застібка флісу"), groupSummary("Капюшон флісу"), groupSummary("Тип флісу"), groupSummary("Малюнок флісу"), groupSummary("Особливості флісу")].filter(Boolean).join(", ");
+  }
+  if(t==="Жилетки"){
+    return [groupSummary("Тип жилета"), groupSummary("Утеплення жилета"), groupSummary("Застібка жилета"), groupSummary("Малюнок жилета"), groupSummary("Особливості жилета")].filter(Boolean).join(", ");
   }
   return d["Фасони вручну"]||"";
 }
