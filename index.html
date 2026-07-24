@@ -323,6 +323,7 @@
           <option value="Кофти">Кофти / світшоти</option>
           <option value="Флісові кофти">Флісові кофти</option>
           <option value="Жилетки">Жилетки</option>
+          <option value="Спортивні штани хб">Спортивні штани котонові (хб)</option>
           <option value="Інше">Інший одяг</option>
         </select>
       </div>
@@ -405,6 +406,21 @@
       <div id="host-vest-pattern"></div>
       <div class="subh">Особливості <small>— % від усього лоту</small></div>
       <div id="host-vest-feat"></div>
+    </div>
+
+    <!-- СПОРТИВНІ ШТАНИ КОТОНОВІ (вузький пресет: усе хб, питаємо лише релевантне) -->
+    <div class="ptype-block" data-ptype="Спортивні штани хб" style="display:none">
+      <p class="sec-d" style="margin-left:0">Уся позиція — котонові (хб) спортивні штани, тому матеріал не питаємо. Нижче — критерії саме під цю позицію: зайві рядки видаляйте кнопкою ✕, свої додавайте кнопкою «+ критерій». Вписуйте кількість одиниць — відсоток порахується сам. У блоках з позначкою «сума = 100%» кожна річ потрапляє лише в один варіант; у блоці «особливості» — рахуйте, скільки одиниць мають цю ознаку.</p>
+      <div class="subh">Фасон / крій <small>— сума = 100%</small></div>
+      <div id="host-pants-fit"></div>
+      <div class="subh">Тип трикотажу <small>— сума = 100%</small></div>
+      <div id="host-pants-fabric"></div>
+      <div class="subh">Пояс <small>— сума = 100%</small></div>
+      <div id="host-pants-waist"></div>
+      <div class="subh">Малюнок <small>— сума = 100%</small></div>
+      <div id="host-pants-pattern"></div>
+      <div class="subh">Особливості та рідкісне <small>— % від усього лоту</small></div>
+      <div id="host-pants-feat"></div>
     </div>
 
     <!-- ІНШЕ -->
@@ -644,6 +660,12 @@ const COUNTER_GROUPS = {
   "host-vest-closure":    {group:"Застібка жилета",  base:"sum",   fmt:"label_pct",   editable:true, rows:["блискавка","ґудзики","кнопки","без застібки"]},
   "host-vest-pattern":    {group:"Малюнок жилета",   base:"sum",   fmt:"label_pct",   editable:true, rows:["однотонні","стьобані","з принтом / написом","камуфляж"]},
   "host-vest-feat":       {group:"Особливості жилета",base:"total",fmt:"label_pct",   editable:true, rows:["з капюшоном","кишені на блискавці","хутряна опушка","світловідбивні елементи","двосторонні","кишеня-кенгуру","логотип / великий бренд"]},
+  // спортивні штани котонові (хб; вузький пресет під позицію)
+  "host-pants-fit":       {group:"Фасон штанів",     base:"sum",   fmt:"label_pct",   editable:true, rows:["джогери (манжет внизу)","прямі","завужені (slim)","широкі / оверсайз","вкорочені / капрі"]},
+  "host-pants-fabric":    {group:"Трикотаж штанів",  base:"sum",   fmt:"label_pct",   editable:true, rows:["футер з начосом (утеплені)","футер двонитка (без начосу)","легкий трикотаж (кулір)","в рубчик"]},
+  "host-pants-waist":     {group:"Пояс штанів",      base:"sum",   fmt:"label_pct",   editable:true, rows:["резинка + шнурок","тільки резинка","висока посадка"]},
+  "host-pants-pattern":   {group:"Малюнок штанів",   base:"sum",   fmt:"label_pct",   editable:true, rows:["однотонні","з принтом / написом","з лампасами / вставками","камуфляж / смужка"]},
+  "host-pants-feat":      {group:"Особливості штанів",base:"total",fmt:"label_pct",   editable:true, rows:["кишені на блискавці","карго-кишені","кишеня ззаду","світловідбивні елементи","логотип / великий бренд","блискавки внизу штанин"]},
   // спортивний мікс (пресет під лот спортивного одягу; усе можна вилучати/додавати)
   "host-sport-type":      {group:"Склад спорт-міксу",base:"sum",   fmt:"label_pct",   editable:true, rows:["футболки / джерсі","майки / безрукавки","лонгсліви / термо","поло спортивне","худі / світшоти","олімпійки (track jacket)","вітровки / анораки","спортивні штани / джогери","легінси / тайтси","шорти спортивні","велосипедки / бриджі","жилети утеплені"]},
   "host-sport-topbottom": {group:"Верх / низ спорт", base:"sum",   fmt:"label_pct",   editable:true, rows:["верх (футболки, худі, олімпійки)","низ (штани, легінси, шорти)"]},
@@ -847,7 +869,7 @@ function manualOr(id, fallback){
   const man = f ? parseFloat(f.value) : NaN;
   return (!isNaN(man) && man>0) ? man : fallback;
 }
-function totalUnits(){ return manualOr("totalUnits", sizeSum() || groupSum("Склад міксу") || groupSum("Склад спорт-міксу")); }
+function totalUnits(){ return manualOr("totalUnits", sizeSum() || groupSum("Склад міксу") || groupSum("Склад спорт-міксу") || groupSum("Фасон штанів")); }
 function totalPairs(){ return manualOr("totalPairs", pairsSum()); }
 function groupBase(g){
   if(g.dataset.base==="total") return g.dataset.totalsrc==="shoe" ? totalPairs() : totalUnits();
@@ -864,7 +886,7 @@ function syncTotal(id, sum){
   }
 }
 function recalcCounters(){
-  syncTotal("totalUnits", sizeSum() || groupSum("Склад міксу") || groupSum("Склад спорт-міксу"));   // одяг
+  syncTotal("totalUnits", sizeSum() || groupSum("Склад міксу") || groupSum("Склад спорт-міксу") || groupSum("Фасон штанів"));   // одяг
   syncTotal("totalPairs", pairsSum());  // взуття
   $$(".cgroup").forEach(g=>{
     const base = groupBase(g);
@@ -1080,8 +1102,8 @@ function applyPrevail(){
 function onType(){
   const t = $("#prodType") ? $("#prodType").value : "";
   $$(".ptype-block").forEach(b=>b.style.display = (b.dataset.ptype===t)?"block":"none");
-  // флісові кофти — матеріал відомий (фліс), не питаємо
-  const mf=$("#materialField"); if(mf) mf.style.display = (t==="Флісові кофти") ? "none" : "";
+  // флісові кофти та хб-штани — матеріал відомий, не питаємо
+  const mf=$("#materialField"); if(mf) mf.style.display = (t==="Флісові кофти" || t==="Спортивні штани хб") ? "none" : "";
 }
 function renumber(){
   let n=0;
@@ -1138,6 +1160,7 @@ function collect(){
   put("Переважають", (document.querySelector('[name="Переважають"]')||{}).value || "");
   put("Новизна", groupSummary("Новизна"));
   if(data["Тип виробу"]==="Флісові кофти") data["Матеріал"]="фліс";
+  if(data["Тип виробу"]==="Спортивні штани хб") data["Матеріал"]="котон / хб (бавовна)";
   if(data["Категорія"]==="Одяг"){
     put("Кольори", groupSummary("Кольори"));
     put("Фасони", fasonString(data));
@@ -1185,6 +1208,9 @@ function fasonString(d){
   }
   if(t==="Жилетки"){
     return [groupSummary("Тип жилета"), groupSummary("Утеплення жилета"), groupSummary("Застібка жилета"), groupSummary("Малюнок жилета"), groupSummary("Особливості жилета")].filter(Boolean).join(", ");
+  }
+  if(t==="Спортивні штани хб"){
+    return [groupSummary("Фасон штанів"), groupSummary("Трикотаж штанів"), groupSummary("Пояс штанів"), groupSummary("Малюнок штанів"), groupSummary("Особливості штанів")].filter(Boolean).join(", ");
   }
   return d["Фасони вручну"]||"";
 }
