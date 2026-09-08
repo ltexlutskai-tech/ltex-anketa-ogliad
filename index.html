@@ -323,6 +323,7 @@
           <option value="Кофти">Кофти / світшоти</option>
           <option value="Флісові кофти">Флісові кофти</option>
           <option value="Жилетки">Жилетки</option>
+          <option value="Куртки">Куртки / верхній одяг</option>
           <option value="Спортивні штани хб">Спортивні штани котонові (хб)</option>
           <option value="Інше">Інший одяг</option>
         </select>
@@ -423,6 +424,39 @@
       <div id="host-pants-feat"></div>
     </div>
 
+    <!-- КУРТКИ (широкий пресет під увесь верхній одяг: зима, демісезон, вітровки, шкіра, джинс, робочі) -->
+    <div class="ptype-block" data-ptype="Куртки" style="display:none">
+      <p class="sec-d" style="margin-left:0">Лот — куртки та верхній одяг. Це найширший пресет: тут навмисно багато критеріїв, щоб охопити будь-який лот. Зайві рядки видаляйте кнопкою ✕, свої додавайте кнопкою «+ критерій». Вписуйте кількість одиниць — відсоток порахується сам. У блоках «сума = 100%» кожна річ потрапляє лише в один варіант; у блоках «% від лоту» рахуйте, скільки одиниць мають цю ознаку (вони можуть пересікатись). Специфічні дефекти курток — у секції «Дефекти».</p>
+      <div class="subh">Тип куртки <small>— сума = 100%</small></div>
+      <div id="host-jacket-type"></div>
+      <div class="subh">Сезон / температурний режим <small>— сума = 100%</small></div>
+      <div id="host-jacket-season"></div>
+      <div class="subh">Утеплювач / наповнювач <small>— сума = 100%</small></div>
+      <div id="host-jacket-insul"></div>
+      <div class="subh">Тканина верху <small>— сума = 100%</small></div>
+      <div id="host-jacket-shell"></div>
+      <div class="subh">Мембрана / технологія захисту <small>— % від усього лоту</small></div>
+      <div id="host-jacket-tech"></div>
+      <div class="subh">Стьобка / фактура верху <small>— % від усього лоту</small></div>
+      <div id="host-jacket-quilt"></div>
+      <div class="subh">Довжина <small>— сума = 100%</small></div>
+      <div id="host-jacket-length"></div>
+      <div class="subh">Крій / посадка <small>— сума = 100%</small></div>
+      <div id="host-jacket-fit"></div>
+      <div class="subh">Застібка <small>— сума = 100%</small></div>
+      <div id="host-jacket-closure"></div>
+      <div class="subh">Капюшон <small>— сума = 100%</small></div>
+      <div id="host-jacket-hood"></div>
+      <div class="subh">Малюнок / колірне рішення <small>— сума = 100%</small></div>
+      <div id="host-jacket-pattern"></div>
+      <div class="subh">Хутро та опушка <small>— % від усього лоту</small></div>
+      <div id="host-jacket-fur"></div>
+      <div class="subh">Деталі: комір, манжети, кишені, підкладка, низ <small>— % від усього лоту</small></div>
+      <div id="host-jacket-detail"></div>
+      <div class="subh">Бренди та преміум-ознаки <small>— % від усього лоту</small></div>
+      <div id="host-jacket-brand"></div>
+    </div>
+
     <!-- ІНШЕ -->
     <div class="ptype-block" data-ptype="Інше" style="display:none">
       <div class="grid one" style="margin-top:8px">
@@ -472,6 +506,11 @@
     <div class="sec-h"><span class="sec-n">7</span><span class="sec-t">Дефекти</span></div>
     <p class="sec-d">Кожен вид дефекту — окреме поле. Вводьте кількість бракованих одиниць, відсоток від загальної кількості рахується сам (можна редагувати).</p>
     <div id="host-defects"></div>
+    <!-- ДЕФЕКТИ, СПЕЦИФІЧНІ ДЛЯ ВЕРХНЬОГО ОДЯГУ (показується, коли тип виробу — Куртки) -->
+    <div class="ptype-block" data-ptype="Куртки" style="display:none">
+      <div class="subh">Дефекти, характерні для курток <small>— % від усього лоту</small></div>
+      <div id="host-jacket-defects"></div>
+    </div>
     <div class="grid one" style="margin-top:14px">
       <div class="field full"><label>Інші дефекти / коментар <small>види, яких немає в списку</small></label>
         <textarea name="Коментар: Дефекти" placeholder="напр.: поодинокі речі з відсутніми ґудзиками; сліди від прання"></textarea></div>
@@ -638,7 +677,7 @@ const COUNTER_GROUPS = {
   "host-sorts":           {group:"Сорти",            base:"sum",   fmt:"label_pct",   rows:["Екстра","Крем","1-й сорт","2-й сорт","Сток"]},
   "host-gender":          {group:"Стать",            base:"sum",   fmt:"label_pct",   rows:["Чоловіче","Жіноче","Дитяче","Унісекс"]},
   "host-tags":            {group:"Новизна",          base:"sum",   fmt:"pct_label",   rows:["з бирками (нове)","нове без бирок","вживане — відмінне","вживане — сліди носки"]},
-  "host-sizes":           {group:"Розміри",          base:"sum",   fmt:"label_colon", editable:true, rows:["XS-S","M","L","XL-2XL","3XL та більше"]},
+  "host-sizes":           {group:"Розміри",          base:"sum",   fmt:"label_colon", editable:true, rows:["XS-S","M","L","XL-2XL","3XL та більше","дитячі 98-116","дитячі 122-140","підліткові 146-164"]},
   "host-colors":          {group:"Кольори",          base:"sum",   fmt:"pct_label",   editable:true, rows:["темні тона","кольорові тона"]},
   // футболки
   "host-tshirt-pattern":  {group:"Малюнок",          base:"sum",   fmt:"label_pct",   editable:true, rows:["однотонні","з принтом"]},
@@ -666,6 +705,22 @@ const COUNTER_GROUPS = {
   "host-pants-waist":     {group:"Пояс штанів",      base:"sum",   fmt:"label_pct",   editable:true, rows:["резинка + шнурок","тільки резинка","висока посадка"]},
   "host-pants-pattern":   {group:"Малюнок штанів",   base:"sum",   fmt:"label_pct",   editable:true, rows:["однотонні","з принтом / написом","з лампасами / вставками","камуфляж / смужка"]},
   "host-pants-feat":      {group:"Особливості штанів",base:"total",fmt:"label_pct",   editable:true, rows:["кишені на блискавці","карго-кишені","кишеня ззаду","світловідбивні елементи","логотип / великий бренд","блискавки внизу штанин"]},
+  // куртки / верхній одяг (широкий пресет: зима, демісезон, вітровки, шкіра, джинс, робочі)
+  "host-jacket-type":     {group:"Тип куртки",       base:"sum",   fmt:"label_pct",   editable:true, rows:["зимові пуховики / стьобані","парки","демісезонні куртки","вітровки / анораки","дощовики / плащівка","softshell","лижні / сноуборд","бомбери","олімпійки / спортивний верх","джинсові","шкіряні / екошкіра","косухи","замшеві","піджаки / блейзери","пальта / напівпальта","тренчі / плащі","дублянки","шуби / хутряні","3-в-1 (зі знімною підстібкою)","робочі / тактичні","сигнальні (хай-віз)"]},
+  "host-jacket-season":   {group:"Сезон курток",     base:"sum",   fmt:"label_pct",   editable:true, rows:["зима (сильний мороз)","зима легка / тепла осінь-зима","демісезон (весна-осінь)","легкі весна-літо","дощ / вітер (без утеплення)"]},
+  "host-jacket-insul":    {group:"Утеплювач куртки", base:"sum",   fmt:"label_pct",   editable:true, rows:["натуральний пух / пух-перо","холлофайбер / синтепух","синтепон","Thinsulate / PrimaLoft / thermore","фліс (утеплена підкладка)","штучне хутро (підкладка)","овчина / натуральне хутро","знімна підстібка","без утеплення (підкладка сітка / тканина)"]},
+  "host-jacket-shell":    {group:"Тканина верху куртки",base:"sum",fmt:"label_pct",   editable:true, rows:["плащівка / поліестер","нейлон / рипстоп","болонь / лаковані","softshell (тягнеться)","мембранна тканина","натуральна шкіра","екошкіра / шкірзам","замша / нубук","денім (джинс)","котон / вощена бавовна","вовна / кашемір (пальтові)","штучне хутро","натуральне хутро","трикотаж / фліс (верх)"]},
+  "host-jacket-tech":     {group:"Мембрана куртки",  base:"total", fmt:"label_pct",   editable:true, rows:["мембрана Gore-Tex","інша мембрана (Sympatex, DryVent, Hyvent)","проклеєні шви (taped seams)","водовідштовхувальне просочення (DWR)","вітрозахист (windproof)","вентиляція під пахвами (pit-zip)","показник водонепроникності на бирці (мм)","маркований утеплювач (Thinsulate, PrimaLoft)"]},
+  "host-jacket-quilt":    {group:"Стьобка куртки",   base:"total", fmt:"label_pct",   editable:true, rows:["горизонтальна стьобка","вертикальна стьобка","ромб / діамант","велика стьобка (oversize puffer)","без стьобки (гладкий верх)","матова поверхня","глянцева / лакова поверхня"]},
+  "host-jacket-length":   {group:"Довжина куртки",   base:"sum",   fmt:"label_pct",   editable:true, rows:["коротка (до талії / бомбер)","стандартна (до стегна)","подовжена (до середини стегна)","довга (нижче коліна)","максі / пальто в підлогу"]},
+  "host-jacket-fit":      {group:"Крій куртки",      base:"sum",   fmt:"label_pct",   editable:true, rows:["приталений (slim)","прямий (regular)","вільний / oversize","розширений донизу (А-силует)","кокон / об'ємний"]},
+  "host-jacket-closure":  {group:"Застібка куртки",  base:"sum",   fmt:"label_pct",   editable:true, rows:["блискавка","блискавка + планка на кнопках","блискавка + планка на липучках","двозамкова блискавка (two-way)","ґудзики","кнопки","анорак (напівзамок, через голову)","пояс / запáх без застібки"]},
+  "host-jacket-hood":     {group:"Капюшон куртки",   base:"sum",   fmt:"label_pct",   editable:true, rows:["капюшон знімний","капюшон вшитий (незнімний)","капюшон ховається в комір","без капюшона (комір-стійка)","без капюшона (відкладний комір)"]},
+  "host-jacket-pattern":  {group:"Малюнок куртки",   base:"sum",   fmt:"label_pct",   editable:true, rows:["однотонні","двоколірні / з контрастними вставками","з принтом / написом","камуфляж","клітинка","смужка","меланж / під джинс","яскраві / неонові","металік / перламутр"]},
+  "host-jacket-fur":      {group:"Хутро куртки",     base:"total", fmt:"label_pct",   editable:true, rows:["натуральне хутро на капюшоні","штучне хутро на капюшоні","опушка знімна","опушка незнімна","хутряний комір","хутряна підкладка (по всій куртці)","овчина / шерпа всередині","без хутра"]},
+  "host-jacket-detail":   {group:"Деталі куртки",    base:"total", fmt:"label_pct",   editable:true, rows:["комір-стійка","відкладний комір","хутряний / плюшевий комір","манжети на резинці","манжети на липучці / кнопці","внутрішні снігозахисні манжети","куліска / резинка по низу","регулювання низу шнурком","снігозахисна спідниця (лижні)","пояс / куліска на талії","кишені на блискавці","кишені прорізні / накладні","карго-кишені","внутрішні кишені","кишеня для документів / телефону","підкладка стьобана","підкладка фліс / хутро","підкладка сітка (легка)","без підкладки","регулювання капюшона шнурком","світловідбивні елементи","логотип / великий бренд"]},
+  "host-jacket-brand":    {group:"Бренди курток",    base:"total", fmt:"label_pct",   editable:true, rows:["топ-аутдор (The North Face, Columbia, Jack Wolfskin)","преміум-аутдор (Patagonia, Arc'teryx, Salomon)","спортивні бренди (Nike, Adidas, Puma)","гірськолижні (Rossignol, Killtec, Crivit)","масмаркет (Zara, H&M, Esprit, C&A)","натуральний пух (down)","натуральна шкіра","натуральне хутро","з бирками / нові","без бренду / no name"]},
+  "host-jacket-defects":  {group:"Дефекти курток",   base:"total", fmt:"pct_label",   editable:true, rows:["зламана / заїдає блискавка","відсутній бігунок","вилазить пух / наповнювач","розрив тканини / прокол","затерті манжети","затертий / засалений комір","потертості на рукавах","пошкоджена мембрана / проклейка швів","залом на плащівці","злиняле / вигоріле","порвана підкладка","відсутнє хутро / опушка","відсутні кнопки / ґудзики","плями / забруднення","сліди від антикрадіжок","деформація після прання"]},
   // спортивний мікс (пресет під лот спортивного одягу; усе можна вилучати/додавати)
   "host-sport-type":      {group:"Склад спорт-міксу",base:"sum",   fmt:"label_pct",   editable:true, rows:["футболки / джерсі","майки / безрукавки","лонгсліви / термо","поло спортивне","худі / світшоти","олімпійки (track jacket)","вітровки / анораки","спортивні штани / джогери","легінси / тайтси","шорти спортивні","велосипедки / бриджі","жилети утеплені"]},
   "host-sport-topbottom": {group:"Верх / низ спорт", base:"sum",   fmt:"label_pct",   editable:true, rows:["верх (футболки, худі, олімпійки)","низ (штани, легінси, шорти)"]},
@@ -869,7 +924,7 @@ function manualOr(id, fallback){
   const man = f ? parseFloat(f.value) : NaN;
   return (!isNaN(man) && man>0) ? man : fallback;
 }
-function totalUnits(){ return manualOr("totalUnits", sizeSum() || groupSum("Склад міксу") || groupSum("Склад спорт-міксу") || groupSum("Фасон штанів")); }
+function totalUnits(){ return manualOr("totalUnits", sizeSum() || groupSum("Склад міксу") || groupSum("Склад спорт-міксу") || groupSum("Фасон штанів") || groupSum("Тип куртки")); }
 function totalPairs(){ return manualOr("totalPairs", pairsSum()); }
 function groupBase(g){
   if(g.dataset.base==="total") return g.dataset.totalsrc==="shoe" ? totalPairs() : totalUnits();
@@ -886,7 +941,7 @@ function syncTotal(id, sum){
   }
 }
 function recalcCounters(){
-  syncTotal("totalUnits", sizeSum() || groupSum("Склад міксу") || groupSum("Склад спорт-міксу") || groupSum("Фасон штанів"));   // одяг
+  syncTotal("totalUnits", sizeSum() || groupSum("Склад міксу") || groupSum("Склад спорт-міксу") || groupSum("Фасон штанів") || groupSum("Тип куртки"));   // одяг
   syncTotal("totalPairs", pairsSum());  // взуття
   $$(".cgroup").forEach(g=>{
     const base = groupBase(g);
@@ -1165,7 +1220,16 @@ function collect(){
     put("Кольори", groupSummary("Кольори"));
     put("Фасони", fasonString(data));
     put("Розміри детально", groupSummary("Розміри"));
-    let def = groupSummary("Дефекти");
+    if(data["Тип виробу"]==="Куртки"){
+      put("Тип куртки", groupSummary("Тип куртки"));
+      put("Сезон курток", groupSummary("Сезон курток"));
+      put("Утеплювач", groupSummary("Утеплювач куртки"));
+      put("Тканина верху", groupSummary("Тканина верху куртки"));
+      put("Мембрана / технологія", groupSummary("Мембрана куртки"));
+      put("Хутро", groupSummary("Хутро куртки"));
+      put("Бренди курток", groupSummary("Бренди курток"));
+    }
+    let def = jacketDefects(groupSummary("Дефекти"), data["Тип виробу"]);
     if(data["Коментар: Дефекти"]) def = [def, data["Коментар: Дефекти"]].filter(Boolean).join("; ");
     put("Дефекти", def);
   }
@@ -1189,6 +1253,11 @@ function collect(){
 }
 
 /* ---------- ПРЕВ'Ю ОПИСУ ---------- */
+/* Дефекти курток живуть окремою групою в секції «Дефекти» — доклеюємо їх до загальних */
+function jacketDefects(def, ptype){
+  if(ptype!=="Куртки") return def;
+  return [def, groupSummary("Дефекти курток")].filter(Boolean).join(", ");
+}
 function fasonString(d){
   const t = d["Тип виробу"];
   if(t==="Спортивний мікс"){
@@ -1211,6 +1280,9 @@ function fasonString(d){
   }
   if(t==="Спортивні штани хб"){
     return [groupSummary("Фасон штанів"), groupSummary("Трикотаж штанів"), groupSummary("Пояс штанів"), groupSummary("Малюнок штанів"), groupSummary("Особливості штанів")].filter(Boolean).join(", ");
+  }
+  if(t==="Куртки"){
+    return ["Тип куртки","Сезон курток","Утеплювач куртки","Тканина верху куртки","Мембрана куртки","Стьобка куртки","Довжина куртки","Крій куртки","Застібка куртки","Капюшон куртки","Малюнок куртки","Хутро куртки","Деталі куртки","Бренди курток"].map(groupSummary).filter(Boolean).join(", ");
   }
   return d["Фасони вручну"]||"";
 }
@@ -1275,7 +1347,7 @@ function buildPreview(){
   adds("стійкість кольору", d["Стійкість кольору"]);
   adds("катишки", d["Катишки"]);
   adds("фурнітура", d["Фурнітура"]);
-  let defects = (cat==="Взуття") ? groupSummary("Дефекти взуття") : groupSummary("Дефекти");
+  let defects = (cat==="Взуття") ? groupSummary("Дефекти взуття") : jacketDefects(groupSummary("Дефекти"), d["Тип виробу"]);
   const defComment = (cat==="Взуття") ? d["Коментар: Взуття"] : d["Коментар: Дефекти"];
   if(cat!=="Взуття" && defComment) defects = [defects, defComment].filter(Boolean).join("; ");
   if(!defects && (cat==="Одяг"||cat==="Взуття")) defects = "без значних дефектів";
