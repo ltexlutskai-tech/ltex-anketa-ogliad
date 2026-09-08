@@ -1406,13 +1406,32 @@ function layoutState(){
   });
   return o;
 }
-function restoreLayout(o){
+/* Стандартні критерії редагованих груп на момент збереження чернетки.
+   Потрібні, щоб відрізнити «користувач сам видалив рядок» від «рядок додали в анкету пізніше». */
+function defaultsState(){
+  const o={};
+  for(const hostId in COUNTER_GROUPS){
+    const def=COUNTER_GROUPS[hostId];
+    if(def.editable) o[def.group]=def.rows.slice();
+  }
+  return o;
+}
+function restoreLayout(o, savedDefaults){
   if(!o) return;
+  const cur = defaultsState();
   for(const grp in o){
     const g=document.querySelector('.cgroup[data-group="'+grp+'"]');
     if(!g || g.dataset.editable!=="1") continue;
     g.querySelectorAll(".crow").forEach(r=>r.remove());
-    o[grp].forEach(label=> g.appendChild(buildCrow(true, label)));
+    const labels = o[grp].slice();
+    // критерії, що зʼявилися в анкеті вже після збереження чернетки, дописуємо в кінець:
+    // інакше стара чернетка назавжди ховала б нові рядки (напр. дитячі ростовки).
+    // Свідомо видалені рядки не повертаються — вони є у знімку savedDefaults.
+    const known = (savedDefaults && savedDefaults[grp]) || [];
+    (cur[grp]||[]).forEach(label=>{
+      if(known.indexOf(label)===-1 && labels.indexOf(label)===-1) labels.push(label);
+    });
+    labels.forEach(label=> g.appendChild(buildCrow(true, label)));
   }
 }
 function saveDraft(){
@@ -1422,6 +1441,7 @@ function saveDraft(){
     const tp=$("#totalPairs"); if(tp && !tp.dataset.dirty) delete d["Усього пар"];
     const pe=document.querySelector('[name="Переважають"]'); if(pe && !pe.dataset.dirty) delete d["Переважають"]; // авто
     d.__layout=layoutState();
+    d.__defaults=defaultsState();
     d.__counters=counterState();
     d.__extras=extrasState();
     d.__fill=fillState();
@@ -1435,10 +1455,10 @@ function loadDraft(){
     const d=JSON.parse(raw);
     restoreExtras(d.__extras); // спершу відновити кастомні поля, щоб їх не перетерло
     restoreFill(d.__fill);
-    restoreLayout(d.__layout); // відновити склад редагованих груп до заповнення лічильників
+    restoreLayout(d.__layout, d.__defaults); // відновити склад редагованих груп до заповнення лічильників
     if(d["Переважають"]){ const pe=document.querySelector('[name="Переважають"]'); if(pe) pe.dataset.dirty="1"; }
     for(const k in d){
-      if(k==="__counters"||k==="__extras"||k==="__fill"||k==="__layout") continue;
+      if(k==="__counters"||k==="__extras"||k==="__fill"||k==="__layout"||k==="__defaults") continue;
       const els=$$('[name="'+CSS.escape(k)+'"]');
       if(k==="Сорт"){ d[k].split(", ").forEach(v=>{const c=document.querySelector('input[name="Сорт"][value="'+v+'"]'); if(c)c.checked=true;}); continue; }
       if(els.length===1 && els[0].type!=="radio") els[0].value=d[k];
