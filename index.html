@@ -162,6 +162,19 @@
   .frow input{font-size:14px;padding:9px 11px}
   .frow .fname{font-weight:600}
   @media(max-width:560px){.frow,.xrow{grid-template-columns:minmax(0,1fr) 72px 38px}}
+  /* Останні відправлені анкети (12.11.2026): нічого не губиться, можна надіслати ще раз */
+  .sent-empty{font-size:14px;color:var(--mut)}
+  .sent-item{border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin:10px 0;display:grid;gap:6px}
+  .sent-top{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 12px}
+  .sent-when{font-family:'Spline Sans Mono',monospace;font-size:12px;color:var(--mut)}
+  .sent-name{font-weight:700;font-size:14px;flex:1 1 220px;min-width:0}
+  .sent-pill{font-size:12px;font-weight:700;padding:3px 9px;border-radius:999px;white-space:nowrap}
+  .sent-pill.ok{background:var(--green-l);color:var(--green-d)}
+  .sent-pill.unconfirmed{background:#fff4d6;color:#7a5200}
+  .sent-pill.error{background:#fde3df;color:#a42a1b}
+  .sent-note{font-size:12px;color:var(--mut);overflow-wrap:anywhere}
+  .sent-actions{display:flex;flex-wrap:wrap;gap:8px}
+  .sent-actions .btn{padding:8px 12px;font-size:13px}
 </style>
 </head>
 <body>
@@ -621,6 +634,13 @@
     <p class="sec-d">Формується автоматично у вашому форматі. Можна скопіювати одразу в картку товару.</p>
     <div class="preview-box" id="preview">Заповніть поля вище…</div>
     <button class="btn copy-btn" type="button" id="copyBtn">📋 Скопіювати опис</button>
+  </section>
+
+  <!-- ОСТАННІ ВІДПРАВЛЕНІ -->
+  <section class="card" id="sentCard">
+    <div class="sec-h"><span class="sec-n">↺</span><span class="sec-t">Останні відправлені анкети</span></div>
+    <p class="sec-d">Зберігаються на цьому пристрої (останні 30). Анкета не дійшла в таблицю — «Надіслати ще раз». Потрібно виправити — «Відкрити у формі».</p>
+    <div id="sentList"></div>
   </section>
 
 </div>
@@ -1478,24 +1498,129 @@ $("#clearBtn").addEventListener("click", ()=>{
 });
 
 /* ---------- ВІДПРАВКА ---------- */
+/* 12.11.2026: анкети за 06.11 і 12.11 не дійшли в таблицю, а сторінка писала
+   «збережено» — будь-яку відповідь, крім явної помилки, вважала успіхом і
+   стирала чернетку. Тепер успіх — лише {ok:true} від таблиці; кожна відправка
+   лишається в «Останніх відправлених» на пристрої з кнопкою «Надіслати ще раз». */
+const SENT="ltex_anketa_sent";
+const SENT_MAX=30;
+function loadSent(){
+  try{ const a=JSON.parse(localStorage.getItem(SENT)||"[]"); return Array.isArray(a)?a:[]; }catch(e){ return []; }
+}
+function storeSent(list){
+  try{ localStorage.setItem(SENT, JSON.stringify(list.slice(0,SENT_MAX))); }catch(e){}
+}
+function plainText(s){
+  return String(s||"").replace(/<style[\s\S]*?<\/style>/gi," ").replace(/<script[\s\S]*?<\/script>/gi," ")
+    .replace(/<[^>]+>/g," ").replace(/\s+/g," ").trim().slice(0,220);
+}
+async function postAnketa(d){
+  let r, text="";
+  try{
+    r=await fetch(APPS_SCRIPT_URL,{
+      method:"POST",
+      headers:{"Content-Type":"text/plain;charset=utf-8"}, // text/plain → без CORS-preflight
+      body:JSON.stringify(d)
+    });
+    text=await r.text();
+  }catch(e){
+    return {status:"error", note:"Немає звʼязку з таблицею: "+e.message};
+  }
+  if(!r.ok) return {status:"error", note:"Таблиця відповіла помилкою (HTTP "+r.status+"): "+plainText(text)};
+  let j=null; try{ j=JSON.parse(text); }catch(e){}
+  if(j && j.ok===true) return {status:"ok", note:""};
+  if(j) return {status:"error", note:"Таблиця не прийняла анкету: "+plainText(j.error||j.message||JSON.stringify(j))};
+  return {status:"unconfirmed", note:"Таблиця не підтвердила запис: "+(plainText(text)||"порожня відповідь")};
+}
+const SENT_LABEL={ok:"✓ у таблиці", unconfirmed:"⚠ не підтверджено", error:"✗ не збережено"};
+function sentWhen(iso){
+  try{ return new Date(iso).toLocaleString("uk",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"}); }catch(e){ return ""; }
+}
+function updateSent(id,res){
+  const list=loadSent();
+  const it=list.find(x=>x.id===id);
+  if(it){ it.status=res.status; it.note=res.note; it.at=new Date().toISOString(); }
+  storeSent(list); renderSent();
+}
+function rememberSent(d,draft,res){
+  const list=loadSent();
+  const same=JSON.stringify(d);
+  // Повторна спроба тієї самої анкети — оновлюємо запис, а не плодимо копії.
+  const prev=list.find(x=>x.status!=="ok" && JSON.stringify(x.data)===same);
+  if(prev){ prev.status=res.status; prev.note=res.note; prev.at=new Date().toISOString(); storeSent(list); renderSent(); return; }
+  list.unshift({
+    id:Date.now()+"-"+Math.random().toString(36).slice(2,7),
+    at:new Date().toISOString(),
+    article:d["Артикул"]||"", name:d["Номенклатура"]||"",
+    status:res.status, note:res.note, data:d, draft:draft
+  });
+  storeSent(list); renderSent();
+}
+function renderSent(){
+  const box=$("#sentList"); if(!box) return;
+  const list=loadSent();
+  box.textContent="";
+  if(!list.length){
+    const p=document.createElement("p"); p.className="sent-empty";
+    p.textContent="Поки порожньо. Після відправки анкета зʼявиться тут.";
+    box.appendChild(p); return;
+  }
+  list.forEach(item=>{
+    const el=document.createElement("div"); el.className="sent-item";
+    const top=document.createElement("div"); top.className="sent-top";
+    const when=document.createElement("span"); when.className="sent-when"; when.textContent=sentWhen(item.at);
+    const name=document.createElement("span"); name.className="sent-name";
+    name.textContent=(item.article?item.article+" · ":"")+(item.name||"без назви");
+    const pill=document.createElement("span"); pill.className="sent-pill "+item.status; pill.textContent=SENT_LABEL[item.status]||item.status;
+    top.append(when,name,pill); el.appendChild(top);
+    if(item.note){ const n=document.createElement("div"); n.className="sent-note"; n.textContent=item.note; el.appendChild(n); }
+    const acts=document.createElement("div"); acts.className="sent-actions";
+    if(item.status!=="ok"){
+      const again=document.createElement("button"); again.type="button"; again.className="btn btn-submit"; again.textContent="Надіслати ще раз";
+      again.addEventListener("click", async ()=>{
+        again.disabled=true; again.textContent="Відправляю…";
+        const res=await postAnketa(item.data);
+        updateSent(item.id,res);
+        toast(res.status==="ok"?"✓ Анкету збережено в таблицю":"Не вдалося: "+res.note.slice(0,90),res.status!=="ok");
+      });
+      acts.appendChild(again);
+    }
+    const open=document.createElement("button"); open.type="button"; open.className="btn btn-ghost"; open.textContent="Відкрити у формі";
+    open.addEventListener("click", ()=>{
+      if(!confirm("Поточна анкета у формі буде замінена цією. Продовжити?")) return;
+      try{ localStorage.setItem(DRAFT, JSON.stringify(item.draft||item.data)); }catch(e){}
+      window.scrollTo(0,0); location.reload();
+    });
+    const del=document.createElement("button"); del.type="button"; del.className="btn btn-ghost"; del.textContent="Прибрати";
+    del.addEventListener("click", ()=>{
+      if(item.status!=="ok" && !confirm("Ця анкета не збережена в таблиці. Точно прибрати?")) return;
+      storeSent(loadSent().filter(x=>x.id!==item.id)); renderSent();
+    });
+    acts.append(open,del); el.appendChild(acts);
+    box.appendChild(el);
+  });
+}
+
 $("#submitBtn").addEventListener("click", async ()=>{
   const d=collect();
   if(!d["Артикул"]){ toast("Вкажіть артикул",true); return; }
   if(!d["Категорія"]){ toast("Оберіть категорію",true); return; }
   if(!APPS_SCRIPT_URL){ toast("Не налаштовано APPS_SCRIPT_URL",true); return; }
   const btn=$("#submitBtn"); btn.disabled=true; btn.textContent="Відправляю…";
+  let draft=null; try{ saveDraft(); draft=JSON.parse(localStorage.getItem(DRAFT)||"null"); }catch(e){}
   try{
-    const r=await fetch(APPS_SCRIPT_URL,{
-      method:"POST",
-      headers:{"Content-Type":"text/plain;charset=utf-8"}, // text/plain → без CORS-preflight
-      body:JSON.stringify(d)
-    });
-    let ok=true; try{ const j=await r.json(); ok=j.ok; }catch(e){}
-    if(ok){ toast("✓ Анкету збережено в таблицю"); try{localStorage.removeItem(DRAFT);}catch(e){}
+    const res=await postAnketa(d);
+    rememberSent(d,draft,res);
+    if(res.status==="ok"){
+      toast("✓ Анкету збережено в таблицю");
+      try{localStorage.removeItem(DRAFT);}catch(e){}
       setTimeout(()=>location.reload(),1200);
-    } else toast("Сервер повернув помилку",true);
-  }catch(e){ toast("Помилка відправки: "+e.message,true); }
-  finally{ btn.disabled=false; btn.textContent="Відправити в таблицю"; }
+    } else if(res.status==="unconfirmed"){
+      toast("⚠ Таблиця не підтвердила запис. Анкета збережена внизу в «Останніх» — перевірте таблицю.",true);
+    } else {
+      toast("✗ Не збережено в таблицю. Анкета лишилась у формі й у «Останніх».",true);
+    }
+  } finally { btn.disabled=false; btn.textContent="Відправити в таблицю"; }
 });
 
 renderCounters();
@@ -1504,6 +1629,7 @@ initFill();
 refreshFieldSuggestions();
 updateFillSuggestions("");
 loadDraft();
+renderSent();
 if(!$$("#host-fill .frow").length) addFillRow("","",false); // завжди хоча б один рядок
 onType();
 onCat();
